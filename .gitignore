@@ -1,0 +1,60 @@
+# ── Entorno y secretos ────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+*.so
+
+# Virtualenvs
+.venv/
+venv/
+env/
+ENV/
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+*.db          # SQLite de tests
+
+# mypy
+.mypy_cache/
+.dmypy.json
+
+# ── Node / React ──────────────────────────────────────────────────────────────
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+.cache/
+*.local
+
+# ── Alembic ───────────────────────────────────────────────────────────────────
+# No ignorar versions/ — las migraciones van al repo
+
+# ── IDEs ──────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

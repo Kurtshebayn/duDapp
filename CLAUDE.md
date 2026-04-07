@@ -67,6 +67,17 @@ Si es_invitado = false → id_jugador apunta al jugador inscrito.
 5. Los routers solo reciben requests, llaman a services, y devuelven responses
 6. Correr los tests después de cada cambio: `cd backend && pytest`
 
+## Variables de entorno
+
+Las credenciales y secrets se manejan con archivos .env que NO están en el repositorio.
+El archivo .env NUNCA debe ser leído, mostrado ni logueado por el agente.
+Si necesitas configurar una variable de entorno, indica qué variable se necesita y qué formato debe tener, pero NO accedas al contenido del archivo .env.
+
+Variables esperadas:
+- DATABASE_URL — conexión a PostgreSQL
+- JWT_SECRET — clave para firmar tokens
+- CORS_ORIGINS — dominios permitidos del frontend
+
 ## Fase actual: Fase 1 — Cimientos
 
 Objetivo: backend funcional con DB conectada y CORS resuelto.
