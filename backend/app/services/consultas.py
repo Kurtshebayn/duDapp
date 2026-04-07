@@ -40,6 +40,26 @@ def _get_todas_posiciones(db: Session, temporada_id: int) -> list[dict]:
     ]
 
 
+def get_temporada_activa_detalle(db: Session) -> dict:
+    temporada = _get_temporada_activa(db)
+    jugadores = (
+        db.query(Jugador)
+        .join(Inscripcion, Inscripcion.id_jugador == Jugador.id)
+        .filter(Inscripcion.id_temporada == temporada.id)
+        .order_by(Jugador.nombre)
+        .all()
+    )
+    total_reuniones = db.query(Reunion).filter(Reunion.id_temporada == temporada.id).count()
+    return {
+        "id": temporada.id,
+        "nombre": temporada.nombre,
+        "estado": temporada.estado,
+        "fecha_inicio": temporada.fecha_inicio,
+        "jugadores": jugadores,
+        "total_reuniones": total_reuniones,
+    }
+
+
 def get_ranking(db: Session) -> list[dict]:
     temporada = _get_temporada_activa(db)
     inscripciones = _get_inscripciones(db, temporada.id)
@@ -80,6 +100,7 @@ def get_resultados_reunion(db: Session, reunion_id: int) -> dict:
             "puntos": p.puntos,
             "nombre": "Invitado" if p.es_invitado else jugadores_map.get(p.id_jugador, "?"),
             "es_invitado": p.es_invitado,
+            "id_jugador": p.id_jugador,
         }
         for p in posiciones_db
     ]

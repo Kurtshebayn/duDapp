@@ -8,6 +8,7 @@ from app.schemas.consultas import (
     EstadisticasResponse,
     RankingEntryResponse,
     ReunionResumenResponse,
+    TemporadaActivaDetalleResponse,
 )
 from app.schemas.reunion import ReunionCreate, ReunionResponse
 from app.schemas.temporada import TemporadaCreate, TemporadaResponse
@@ -50,6 +51,11 @@ def registrar_reunion(
 
 
 # ── Public endpoints ──────────────────────────────────────────────────────────
+
+
+@router.get("/activa", response_model=TemporadaActivaDetalleResponse)
+def get_temporada_activa(db: Session = Depends(get_db)):
+    return consultas_service.get_temporada_activa_detalle(db)
 
 
 @router.get("/activa/ranking", response_model=list[RankingEntryResponse])

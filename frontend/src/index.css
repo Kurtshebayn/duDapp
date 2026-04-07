@@ -321,3 +321,209 @@ tbody td {
   .top3 { grid-template-columns: 1fr; }
   .highlight-cards { grid-template-columns: 1fr; }
 }
+
+/* ── Admin ───────────────────────────────────────────────────────────────── */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: grab;
+  user-select: none;
+  border: 1px solid var(--border);
+}
+.chip:active { cursor: grabbing; }
+
+.chip-player {
+  background: rgba(124, 92, 191, 0.15);
+  color: var(--accent-light);
+  border-color: rgba(124, 92, 191, 0.3);
+}
+
+.chip-invitado {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border-style: dashed;
+  cursor: grab;
+}
+
+.chip-invitado-slot {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  min-height: 44px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.slot.drag-over {
+  border-color: var(--accent);
+  background: rgba(124, 92, 191, 0.08);
+}
+
+.slot-num {
+  font-weight: 700;
+  font-size: 0.8rem;
+  min-width: 20px;
+  text-align: right;
+}
+
+.btn-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 0.2rem;
+  line-height: 1;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.btn-remove:hover { color: var(--text); }
+
+.form-group { margin-bottom: 1.25rem; }
+
+.form-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus { border-color: var(--accent); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  text-decoration: none;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn:not(:disabled):hover { opacity: 0.85; }
+
+.btn-primary { background: var(--accent); color: #fff; }
+
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.btn-danger {
+  background: rgba(220, 60, 60, 0.12);
+  border: 1px solid rgba(220, 60, 60, 0.3);
+  color: #e06060;
+}
+
+.btn-sm { padding: 0.35rem 0.75rem; font-size: 0.82rem; }
+
+.season-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.season-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.season-name { font-size: 1.2rem; font-weight: 700; }
+
+.season-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+.empty-state { text-align: center; padding: 4rem 1rem; }
+.empty-state-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+.empty-state-sub { color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
+
+.alert { padding: 0.75rem 1rem; border-radius: var(--radius); font-size: 0.9rem; margin-bottom: 1rem; }
+.alert-error {
+  background: rgba(220, 60, 60, 0.1);
+  border: 1px solid rgba(220, 60, 60, 0.3);
+  color: #e06060;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  user-select: none;
+}
+.checkbox-item:hover { border-color: var(--accent); }
+.checkbox-item.selected {
+  border-color: var(--accent);
+  background: rgba(124, 92, 191, 0.1);
+}
+.checkbox-item input { display: none; }
+
+.posicionador {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.disponibles-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-content: flex-start;
+  min-height: 60px;
+}
+
+.slots-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+@media (max-width: 560px) {
+  .posicionador { grid-template-columns: 1fr; }
+  .season-card-header { flex-direction: column; }
+}

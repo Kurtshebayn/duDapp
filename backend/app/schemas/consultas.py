@@ -2,6 +2,17 @@ from datetime import date
 
 from pydantic import BaseModel
 
+from app.schemas.jugador import JugadorResponse
+
+
+class TemporadaActivaDetalleResponse(BaseModel):
+    id: int
+    nombre: str
+    estado: str
+    fecha_inicio: date
+    jugadores: list[JugadorResponse]
+    total_reuniones: int
+
 
 class RankingEntryResponse(BaseModel):
     id_jugador: int
@@ -15,6 +26,7 @@ class PosicionResultadoResponse(BaseModel):
     puntos: int
     nombre: str
     es_invitado: bool
+    id_jugador: int | None = None
 
 
 class ReunionResultadosResponse(BaseModel):

@@ -78,15 +78,15 @@ Variables esperadas:
 - JWT_SECRET — clave para firmar tokens
 - CORS_ORIGINS — dominios permitidos del frontend
 
-## Fase actual: Fase 4 — Frontend base
+## Fase actual: Fase 5 — Frontend admin
 
-Objetivo: tener la aplicación React funcionando con navegación y las vistas públicas.
-- Inicializar proyecto React, configurar routing
-- Vista pública: tabla de posiciones
-- Vista pública: resultados por reunión
-- Vista pública: estadísticas
-- Conectar con la API del backend
-- Desplegar en Vercel
+Objetivo: implementar las vistas protegidas del administrador.
+- Pantalla de login
+- Vista: crear temporada y seleccionar jugadores
+- Vista: registrar reunión con drag & drop (CU-02) — el feature más crítico y riesgoso
+- Vista: editar reunión (CU-03)
+- Vista: cerrar temporada (CU-07)
+- Botón de compartir link (CU-08)
 
 ## Fases completadas
 
@@ -98,5 +98,8 @@ Endpoints del admin y lógica de puntos implementados con TDD. Crear temporada (
 
 ### Fase 3 — Datos públicos
 Endpoints de lectura para espectadores implementados. Tabla de posiciones con regla de visibilidad (CU-04), resultados por reunión incluyendo invitados (CU-05), estadísticas de la temporada (CU-06). Tests de integración validados.
+
+### Fase 4 — Frontend base
+Aplicación React inicializada con Vite y React Router. Vistas públicas implementadas: tabla de posiciones con medallas, resultados por reunión con badge de invitado, estadísticas con top 3 y tabla completa. Servicio API conectado al backend. Configuración de Vercel lista con rewrites para client-side routing.
 
 Ver /docs/roadmap.md para detalle completo.
