@@ -32,7 +32,7 @@ export default function Login() {
       {error && <div className="alert alert-error">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label className="form-label">Email o nombre</label>
+          <label className="form-label">Nombre</label>
           <input
             className="form-input"
             type="text"
