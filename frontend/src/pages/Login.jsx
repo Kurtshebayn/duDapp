@@ -6,7 +6,7 @@ import { login as apiLogin } from '../services/api'
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [identificador, setIdentificador] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -16,7 +16,7 @@ export default function Login() {
     setError(null)
     setLoading(true)
     try {
-      const data = await apiLogin(email, password)
+      const data = await apiLogin(identificador, password)
       login(data.access_token)
       navigate('/admin')
     } catch (err) {
@@ -32,12 +32,13 @@ export default function Login() {
       {error && <div className="alert alert-error">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label className="form-label">Email</label>
+          <label className="form-label">Email o nombre</label>
           <input
             className="form-input"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            value={identificador}
+            onChange={(e) => setIdentificador(e.target.value)}
+            placeholder="admin@dudo.com o Admin"
             required
             autoFocus
           />

@@ -25,11 +25,11 @@ export const getJugadores = () => apiFetch('/jugadores')
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
 
-export function login(email, password) {
+export function login(identificador, password) {
   return apiFetch('/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ identificador, password }),
   })
 }
 

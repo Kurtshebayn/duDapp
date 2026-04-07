@@ -1,6 +1,6 @@
-def test_login_exitoso(client, admin_user):
+def test_login_exitoso_con_email(client, admin_user):
     response = client.post("/auth/login", json={
-        "email": "admin@dudo.com",
+        "identificador": "admin@dudo.com",
         "password": "admin123",
     })
     assert response.status_code == 200
@@ -9,9 +9,18 @@ def test_login_exitoso(client, admin_user):
     assert data["token_type"] == "bearer"
 
 
+def test_login_exitoso_con_nombre(client, admin_user):
+    response = client.post("/auth/login", json={
+        "identificador": "Admin",
+        "password": "admin123",
+    })
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+
+
 def test_login_password_incorrecto(client, admin_user):
     response = client.post("/auth/login", json={
-        "email": "admin@dudo.com",
+        "identificador": "admin@dudo.com",
         "password": "equivocado",
     })
     assert response.status_code == 401
@@ -19,7 +28,7 @@ def test_login_password_incorrecto(client, admin_user):
 
 def test_login_usuario_inexistente(client):
     response = client.post("/auth/login", json={
-        "email": "noexiste@dudo.com",
+        "identificador": "noexiste",
         "password": "admin123",
     })
     assert response.status_code == 401
@@ -29,7 +38,6 @@ def test_endpoint_protegido_sin_token(client, admin_user):
     from app.auth.dependencies import get_current_user
     from app.main import app
 
-    # Add a quick protected route to test the dependency
     from fastapi import Depends
     from app.models.usuario import Usuario
 
@@ -43,7 +51,7 @@ def test_endpoint_protegido_sin_token(client, admin_user):
 
 def test_endpoint_protegido_con_token_valido(client, admin_user):
     login_response = client.post("/auth/login", json={
-        "email": "admin@dudo.com",
+        "identificador": "admin@dudo.com",
         "password": "admin123",
     })
     token = login_response.json()["access_token"]

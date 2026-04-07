@@ -4,7 +4,7 @@ from datetime import date
 
 @pytest.fixture
 def auth_headers(client, admin_user):
-    r = client.post("/auth/login", json={"email": "admin@dudo.com", "password": "admin123"})
+    r = client.post("/auth/login", json={"identificador": "admin@dudo.com", "password": "admin123"})
     return {"Authorization": f"Bearer {r.json()['access_token']}"}
 
 
