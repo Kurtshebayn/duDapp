@@ -15,6 +15,7 @@ def temporada_con_datos(client, admin_user):
         "/temporadas",
         json={
             "nombre": "Liga 2024",
+            "fecha_inicio": "2024-01-01",
             "jugadores": [{"nombre": "Ana"}, {"nombre": "Bruno"}, {"nombre": "Carlos"}],
         },
         headers=headers,
@@ -55,6 +56,7 @@ def escenario(client, db, admin_user):
         "/temporadas",
         json={
             "nombre": "Liga 2024",
+            "fecha_inicio": "2024-01-01",
             "jugadores": [{"nombre": "Ana"}, {"nombre": "Bruno"}, {"nombre": "Carlos"}],
         },
         headers=headers,
@@ -127,7 +129,7 @@ def test_ranking_excluye_jugadores_sin_asistencias(client, admin_user):
     headers = _auth_headers(client)
     client.post(
         "/temporadas",
-        json={"nombre": "Liga", "jugadores": [{"nombre": "X"}, {"nombre": "Y"}]},
+        json={"nombre": "Liga", "fecha_inicio": "2024-01-01", "jugadores": [{"nombre": "X"}, {"nombre": "Y"}]},
         headers=headers,
     )
     r = client.get("/temporadas/activa/ranking")

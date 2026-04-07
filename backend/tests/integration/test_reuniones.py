@@ -19,7 +19,7 @@ def temporada_con_jugadores(client, auth_headers, db):
 
     r = client.post(
         "/temporadas",
-        json={"nombre": "Liga 2024", "jugadores": [{"id": j.id} for j in jugadores]},
+        json={"nombre": "Liga 2024", "fecha_inicio": "2024-01-01", "jugadores": [{"id": j.id} for j in jugadores]},
         headers=auth_headers,
     )
     return r.json(), jugadores

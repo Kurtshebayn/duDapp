@@ -7,6 +7,7 @@ from app.schemas.jugador import JugadorInput
 
 class TemporadaCreate(BaseModel):
     nombre: str
+    fecha_inicio: date
     jugadores: list[JugadorInput]
 
 

@@ -78,15 +78,16 @@ Variables esperadas:
 - JWT_SECRET — clave para firmar tokens
 - CORS_ORIGINS — dominios permitidos del frontend
 
-## Fase actual: Fase 5 — Frontend admin
+## Fase actual: Fase 6 — Pulido y lanzamiento
 
-Objetivo: implementar las vistas protegidas del administrador.
-- Pantalla de login
-- Vista: crear temporada y seleccionar jugadores
-- Vista: registrar reunión con drag & drop (CU-02) — el feature más crítico y riesgoso
-- Vista: editar reunión (CU-03)
-- Vista: cerrar temporada (CU-07)
-- Botón de compartir link (CU-08)
+Objetivo: preparar para uso real.
+- Probar drag & drop en dispositivos móviles reales (R-04)
+- Implementar indicador de carga para cold starts (R-01)
+- Implementar script de backup de base de datos (R-03)
+- Documentar proceso de reseteo de contraseña (R-05)
+- Crear el usuario admin inicial en producción
+- Desplegar backend en Render y frontend en Vercel
+- Lanzar con la liga de Dudo real
 
 ## Fases completadas
 
@@ -101,5 +102,8 @@ Endpoints de lectura para espectadores implementados. Tabla de posiciones con re
 
 ### Fase 4 — Frontend base
 Aplicación React inicializada con Vite y React Router. Vistas públicas implementadas: tabla de posiciones con medallas, resultados por reunión con badge de invitado, estadísticas con top 3 y tabla completa. Servicio API conectado al backend. Configuración de Vercel lista con rewrites para client-side routing.
+
+### Fase 5 — Frontend admin
+Vistas protegidas del administrador implementadas. Login con JWT en localStorage, dashboard con estado de temporada activa, crear temporada con selección de jugadores, registrar y editar reunión con drag & drop (HTML5 DnD), cerrar temporada, compartir link (CU-08). Endpoints adicionales: GET /jugadores, GET /temporadas/activa.
 
 Ver /docs/roadmap.md para detalle completo.

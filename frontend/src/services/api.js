@@ -33,11 +33,11 @@ export function login(email, password) {
   })
 }
 
-export function crearTemporada(token, nombre, jugadores) {
+export function crearTemporada(token, nombre, fechaInicio, jugadores) {
   return apiFetch('/temporadas', {
     method: 'POST',
     headers: authHeaders(token),
-    body: JSON.stringify({ nombre, jugadores }),
+    body: JSON.stringify({ nombre, fecha_inicio: fechaInicio, jugadores }),
   })
 }
 

@@ -8,7 +8,8 @@
       "Bash(python -m pytest tests/integration/test_consultas.py -v)",
       "Bash(python:*)",
       "Bash(npm install:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(ADMIN_PASSWORD=admin123 python:*)"
     ]
   }
 }

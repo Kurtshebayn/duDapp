@@ -7,6 +7,7 @@ export default function CrearTemporada() {
   const { token } = useAuth()
   const navigate = useNavigate()
   const [nombre, setNombre] = useState('')
+  const [fechaInicio, setFechaInicio] = useState(() => new Date().toISOString().slice(0, 10))
   const [jugadoresExistentes, setJugadoresExistentes] = useState([])
   const [seleccionados, setSeleccionados] = useState(new Set())
   const [nuevosNombres, setNuevosNombres] = useState([]) // nombres de jugadores nuevos
@@ -50,7 +51,7 @@ export default function CrearTemporada() {
         ...[...seleccionados].map((id) => ({ id })),
         ...nuevosNombres.map((n) => ({ nombre: n })),
       ]
-      await crearTemporada(token, nombre, jugadores)
+      await crearTemporada(token, nombre, fechaInicio, jugadores)
       navigate('/admin')
     } catch (err) {
       setError(err.message)
@@ -75,6 +76,17 @@ export default function CrearTemporada() {
             placeholder="Ej: Liga 2025"
             required
             autoFocus
+          />
+        </div>
+
+        <div className="form-group" style={{ maxWidth: 220 }}>
+          <label className="form-label">Fecha de inicio</label>
+          <input
+            className="form-input"
+            type="date"
+            value={fechaInicio}
+            onChange={(e) => setFechaInicio(e.target.value)}
+            required
           />
         </div>
 

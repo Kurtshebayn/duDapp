@@ -28,7 +28,7 @@ def crear_temporada(
     db: Session = Depends(get_db),
     user: Usuario = Depends(get_current_user),
 ):
-    return temporada_service.crear_temporada(db, body.nombre, body.jugadores, user.id)
+    return temporada_service.crear_temporada(db, body.nombre, body.fecha_inicio, body.jugadores, user.id)
 
 
 @router.post("/{temporada_id}/cerrar", response_model=TemporadaResponse)

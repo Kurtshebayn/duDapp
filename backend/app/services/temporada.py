@@ -8,13 +8,13 @@ from app.models.jugador import Jugador
 from app.models.temporada import EstadoTemporada, Temporada
 
 
-def crear_temporada(db: Session, nombre: str, jugadores_input: list, usuario_id: int) -> Temporada:
+def crear_temporada(db: Session, nombre: str, fecha_inicio: date, jugadores_input: list, usuario_id: int) -> Temporada:
     if db.query(Temporada).filter(Temporada.estado == EstadoTemporada.activa).first():
         raise HTTPException(status_code=400, detail="Ya existe una temporada activa")
 
     temporada = Temporada(
         nombre=nombre,
-        fecha_inicio=date.today(),
+        fecha_inicio=fecha_inicio,
         estado=EstadoTemporada.activa,
         id_usuario=usuario_id,
     )
