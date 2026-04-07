@@ -78,7 +78,25 @@ Variables esperadas:
 - JWT_SECRET — clave para firmar tokens
 - CORS_ORIGINS — dominios permitidos del frontend
 
-## Fase actual: Fase 1 — Cimientos
+## Fase actual: Fase 4 — Frontend base
 
-Objetivo: backend funcional con DB conectada y CORS resuelto.
+Objetivo: tener la aplicación React funcionando con navegación y las vistas públicas.
+- Inicializar proyecto React, configurar routing
+- Vista pública: tabla de posiciones
+- Vista pública: resultados por reunión
+- Vista pública: estadísticas
+- Conectar con la API del backend
+- Desplegar en Vercel
+
+## Fases completadas
+
+### Fase 1 — Cimientos
+Backend funcional con DB conectada y CORS resuelto. Proyecto FastAPI inicializado, modelos SQLAlchemy creados, migraciones Alembic configuradas, autenticación JWT implementada.
+
+### Fase 2 — Lógica de negocio
+Endpoints del admin y lógica de puntos implementados con TDD. Crear temporada (CU-01), registrar reunión (CU-02), editar reunión (CU-03), cerrar temporada (CU-07). Tests unitarios y de integración validados.
+
+### Fase 3 — Datos públicos
+Endpoints de lectura para espectadores implementados. Tabla de posiciones con regla de visibilidad (CU-04), resultados por reunión incluyendo invitados (CU-05), estadísticas de la temporada (CU-06). Tests de integración validados.
+
 Ver /docs/roadmap.md para detalle completo.

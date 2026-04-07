@@ -3,7 +3,12 @@
     "allow": [
       "Bash(pip install:*)",
       "Bash(pytest -v)",
-      "Bash(pip show:*)"
+      "Bash(pip show:*)",
+      "Bash(pytest tests/unit/ -v)",
+      "Bash(python -m pytest tests/integration/test_consultas.py -v)",
+      "Bash(python:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

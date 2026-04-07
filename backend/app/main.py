@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import CORS_ORIGINS
-from app.routers import auth
+from app.routers import auth, reuniones, temporadas
 
 app = FastAPI(title="duDapp API")
 
@@ -14,6 +14,8 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(temporadas.router)
+app.include_router(reuniones.router)
 
 
 @app.get("/health")
