@@ -20,18 +20,7 @@ export default function Nav() {
         {isAuthenticated ? (
           <>
             <NavLink to="/admin">Admin</NavLink>
-            <button
-              onClick={handleLogout}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                padding: '0.5rem 0.75rem',
-                fontSize: 'inherit',
-                borderRadius: 'var(--radius)',
-              }}
-            >
+            <button onClick={handleLogout} className="nav-logout">
               Salir
             </button>
           </>
