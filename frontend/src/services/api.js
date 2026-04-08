@@ -63,3 +63,13 @@ export function cerrarTemporada(token, temporadaId) {
     headers: authHeaders(token),
   })
 }
+
+export function subirFotoJugador(token, id, file) {
+  const form = new FormData()
+  form.append('foto', file)
+  return apiFetch(`/jugadores/${id}/foto`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  })
+}

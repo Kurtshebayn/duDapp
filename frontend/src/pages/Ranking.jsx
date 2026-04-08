@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getRanking } from '../services/api'
+import PlayerAvatar from '../components/PlayerAvatar'
 
 const MEDAL = { 1: '🥇', 2: '🥈', 3: '🥉' }
 
@@ -43,7 +44,12 @@ export default function Ranking() {
                       {MEDAL[pos] ?? pos}
                     </span>
                   </td>
-                  <td>{entry.nombre}</td>
+                  <td>
+                    <span className="player-name-cell">
+                      <PlayerAvatar nombre={entry.nombre} fotoUrl={entry.foto_url} />
+                      {entry.nombre}
+                    </span>
+                  </td>
                   <td><strong>{entry.puntos}</strong></td>
                   <td>{entry.asistencias}</td>
                 </tr>

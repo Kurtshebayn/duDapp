@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getResultadosReunion } from '../services/api'
+import PlayerAvatar from '../components/PlayerAvatar'
 
 function formatFecha(iso) {
   const [y, m, d] = iso.split('-')
@@ -52,8 +53,11 @@ export default function ReunionDetalle() {
                   </span>
                 </td>
                 <td>
-                  {p.nombre}
-                  {p.es_invitado && <span className="badge-invitado">invitado</span>}
+                  <span className="player-name-cell">
+                    <PlayerAvatar nombre={p.nombre} fotoUrl={p.foto_url} />
+                    {p.nombre}
+                    {p.es_invitado && <span className="badge-invitado">invitado</span>}
+                  </span>
                 </td>
                 <td>{p.puntos}</td>
               </tr>

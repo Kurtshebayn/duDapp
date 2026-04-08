@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getEstadisticas } from '../services/api'
+import PlayerAvatar from '../components/PlayerAvatar'
 
 const PODIO = ['🥇', '🥈', '🥉']
 
@@ -33,6 +34,7 @@ export default function Estadisticas() {
             {top3.map((e, i) => (
               <div key={e.id_jugador} className="top3-card">
                 <div className="top3-pos">{PODIO[i]}</div>
+                <PlayerAvatar nombre={e.nombre} fotoUrl={e.foto_url} size={48} />
                 <div className="top3-nombre">{e.nombre}</div>
                 <div className="top3-puntos">{e.puntos} pts · {e.asistencias} asist.</div>
               </div>
@@ -75,7 +77,12 @@ export default function Estadisticas() {
             {ranking.map((e, i) => (
               <tr key={e.id_jugador}>
                 <td><span className={`rank-num rank-${i + 1}`}>{i + 1}</span></td>
-                <td>{e.nombre}</td>
+                <td>
+                  <span className="player-name-cell">
+                    <PlayerAvatar nombre={e.nombre} fotoUrl={e.foto_url} />
+                    {e.nombre}
+                  </span>
+                </td>
                 <td><strong>{e.puntos}</strong></td>
                 <td>{e.asistencias}</td>
                 <td>{e.promedio}</td>

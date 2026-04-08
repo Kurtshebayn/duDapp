@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
-import { getJugadores, crearTemporada } from '../../services/api'
+import { getJugadores, crearTemporada, subirFotoJugador } from '../../services/api'
+import PlayerAvatar from '../../components/PlayerAvatar'
 
 export default function CrearTemporada() {
   const { token } = useAuth()
   const navigate = useNavigate()
+  const fileInputRef = useRef(null)
+  const [uploadingId, setUploadingId] = useState(null)
   const [nombre, setNombre] = useState('')
   const [fechaInicio, setFechaInicio] = useState(() => new Date().toISOString().slice(0, 10))
   const [jugadoresExistentes, setJugadoresExistentes] = useState([])
@@ -18,6 +21,29 @@ export default function CrearTemporada() {
   useEffect(() => {
     getJugadores().then((data) => setJugadoresExistentes(data ?? []))
   }, [])
+
+  function handleFotoClick(jugadorId) {
+    fileInputRef.current.dataset.jugadorId = jugadorId
+    fileInputRef.current.click()
+  }
+
+  async function handleFotoChange(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    const jugadorId = Number(fileInputRef.current.dataset.jugadorId)
+    e.target.value = ''
+    setUploadingId(jugadorId)
+    try {
+      const updated = await subirFotoJugador(token, jugadorId, file)
+      setJugadoresExistentes((prev) =>
+        prev.map((j) => (j.id === jugadorId ? { ...j, foto_url: updated.foto_url } : j))
+      )
+    } catch {
+      // silencioso — el avatar simplemente no cambia
+    } finally {
+      setUploadingId(null)
+    }
+  }
 
   function toggleSeleccionado(id) {
     setSeleccionados((prev) => {
@@ -90,19 +116,38 @@ export default function CrearTemporada() {
           />
         </div>
 
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleFotoChange}
+        />
+
         {jugadoresExistentes.length > 0 && (
           <div className="form-group">
             <label className="form-label">Jugadores existentes</label>
             <div className="checkbox-grid">
               {jugadoresExistentes.map((j) => (
-                <label
-                  key={j.id}
-                  className={`checkbox-item${seleccionados.has(j.id) ? ' selected' : ''}`}
-                  onClick={() => toggleSeleccionado(j.id)}
-                >
-                  <input type="checkbox" readOnly checked={seleccionados.has(j.id)} />
-                  {j.nombre}
-                </label>
+                <div key={j.id} className="checkbox-item-wrap">
+                  <label
+                    className={`checkbox-item${seleccionados.has(j.id) ? ' selected' : ''}`}
+                    onClick={() => toggleSeleccionado(j.id)}
+                  >
+                    <input type="checkbox" readOnly checked={seleccionados.has(j.id)} />
+                    <PlayerAvatar nombre={j.nombre} fotoUrl={j.foto_url} size={22} />
+                    {j.nombre}
+                  </label>
+                  <button
+                    type="button"
+                    className="btn-foto"
+                    title="Cambiar foto"
+                    disabled={uploadingId === j.id}
+                    onClick={() => handleFotoClick(j.id)}
+                  >
+                    {uploadingId === j.id ? '…' : '📷'}
+                  </button>
+                </div>
               ))}
             </div>
           </div>

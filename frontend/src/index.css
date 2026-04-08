@@ -545,10 +545,27 @@ tbody td {
   color: #e06060;
 }
 
+.player-name-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .checkbox-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 0.5rem;
+}
+
+.checkbox-item-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.checkbox-item-wrap .checkbox-item {
+  flex: 1;
+  min-width: 0;
 }
 
 .checkbox-item {
@@ -569,6 +586,20 @@ tbody td {
   background: rgba(124, 92, 191, 0.1);
 }
 .checkbox-item input { display: none; }
+
+.btn-foto {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.4rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+.btn-foto:hover:not(:disabled) { border-color: var(--accent); }
+.btn-foto:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .posicionador {
   display: grid;
