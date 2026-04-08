@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
 import ProtectedRoute from './auth/ProtectedRoute'
 import Nav from './components/Nav'
+import ColdStartBanner from './components/ColdStartBanner'
 import Ranking from './pages/Ranking'
 import Reuniones from './pages/Reuniones'
 import ReunionDetalle from './pages/ReunionDetalle'
@@ -16,6 +17,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Nav />
+        <ColdStartBanner />
         <main className="container">
           <Routes>
             <Route path="/" element={<Navigate to="/ranking" replace />} />

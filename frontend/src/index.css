@@ -322,6 +322,34 @@ tbody td {
   .highlight-cards { grid-template-columns: 1fr; }
 }
 
+/* Cold start banner */
+.cold-start-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(124, 92, 191, 0.12);
+  border-bottom: 1px solid rgba(124, 92, 191, 0.3);
+  color: var(--accent-light);
+  font-size: 0.85rem;
+  padding: 0.6rem 1rem;
+  text-align: center;
+}
+
+.cold-start-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(160, 125, 224, 0.3);
+  border-top-color: var(--accent-light);
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ── Admin ───────────────────────────────────────────────────────────────── */
 
 .chip {
