@@ -9,7 +9,8 @@
       "Bash(python:*)",
       "Bash(npm install:*)",
       "Bash(npm run:*)",
-      "Bash(ADMIN_PASSWORD=admin123 python:*)"
+      "Bash(ADMIN_PASSWORD=admin123 python:*)",
+      "Bash(pytest tests/ -q)"
     ]
   }
 }

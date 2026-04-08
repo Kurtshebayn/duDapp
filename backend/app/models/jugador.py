@@ -7,3 +7,4 @@ class Jugador(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, nullable=False)
+    foto_url = Column(String, nullable=True)

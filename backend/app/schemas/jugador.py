@@ -15,5 +15,6 @@ class JugadorInput(BaseModel):
 class JugadorResponse(BaseModel):
     id: int
     nombre: str
+    foto_url: str | None = None
 
     model_config = {"from_attributes": True}
