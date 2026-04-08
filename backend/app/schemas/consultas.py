@@ -19,6 +19,7 @@ class RankingEntryResponse(BaseModel):
     nombre: str
     puntos: int
     asistencias: int
+    foto_url: str | None = None
 
 
 class PosicionResultadoResponse(BaseModel):
@@ -27,6 +28,7 @@ class PosicionResultadoResponse(BaseModel):
     nombre: str
     es_invitado: bool
     id_jugador: int | None = None
+    foto_url: str | None = None
 
 
 class ReunionResultadosResponse(BaseModel):
@@ -51,6 +53,7 @@ class EstadisticasEntryResponse(BaseModel):
     asistencias: int
     promedio: float
     inasistencias: int
+    foto_url: str | None = None
 
 
 class EstadisticasResponse(BaseModel):

@@ -23,7 +23,7 @@ def _get_inscripciones(db: Session, temporada_id: int) -> list[dict]:
         .filter(Inscripcion.id_temporada == temporada_id)
         .all()
     )
-    return [{"id_jugador": j.id, "nombre": j.nombre} for j in rows]
+    return [{"id_jugador": j.id, "nombre": j.nombre, "foto_url": j.foto_url} for j in rows]
 
 
 def _get_todas_posiciones(db: Session, temporada_id: int) -> list[dict]:
@@ -64,7 +64,11 @@ def get_ranking(db: Session) -> list[dict]:
     temporada = _get_temporada_activa(db)
     inscripciones = _get_inscripciones(db, temporada.id)
     posiciones = _get_todas_posiciones(db, temporada.id)
-    return calcular_ranking(inscripciones, posiciones)
+    ranking = calcular_ranking(inscripciones, posiciones)
+    foto_map = {i["id_jugador"]: i["foto_url"] for i in inscripciones}
+    for entry in ranking:
+        entry["foto_url"] = foto_map.get(entry["id_jugador"])
+    return ranking
 
 
 def get_reuniones_activa(db: Session) -> list[Reunion]:
@@ -89,8 +93,8 @@ def get_resultados_reunion(db: Session, reunion_id: int) -> dict:
         .all()
     )
 
-    jugadores_map: dict[int, str] = {
-        j.id: j.nombre
+    jugadores_map: dict[int, dict] = {
+        j.id: {"nombre": j.nombre, "foto_url": j.foto_url}
         for j in db.query(Jugador).all()
     }
 
@@ -98,9 +102,10 @@ def get_resultados_reunion(db: Session, reunion_id: int) -> dict:
         {
             "posicion": p.posicion,
             "puntos": p.puntos,
-            "nombre": "Invitado" if p.es_invitado else jugadores_map.get(p.id_jugador, "?"),
+            "nombre": "Invitado" if p.es_invitado else jugadores_map.get(p.id_jugador, {}).get("nombre", "?"),
             "es_invitado": p.es_invitado,
             "id_jugador": p.id_jugador,
+            "foto_url": None if p.es_invitado else jugadores_map.get(p.id_jugador, {}).get("foto_url"),
         }
         for p in posiciones_db
     ]
@@ -120,6 +125,9 @@ def get_estadisticas(db: Session) -> dict:
     total_reuniones = db.query(Reunion).filter(Reunion.id_temporada == temporada.id).count()
 
     ranking = calcular_estadisticas(inscripciones, posiciones, total_reuniones)
+    foto_map = {i["id_jugador"]: i["foto_url"] for i in inscripciones}
+    for entry in ranking:
+        entry["foto_url"] = foto_map.get(entry["id_jugador"])
 
     mejor_promedio = max(ranking, key=lambda x: x["promedio"]) if ranking else None
     mas_inasistencias = max(ranking, key=lambda x: x["inasistencias"]) if ranking else None
