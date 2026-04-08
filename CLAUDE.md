@@ -85,9 +85,7 @@ Objetivo: preparar para uso real.
 - Implementar indicador de carga para cold starts (R-01)
 - Implementar script de backup de base de datos (R-03)
 - Documentar proceso de reseteo de contraseña (R-05)
-- Crear el usuario admin inicial en producción
 - Desplegar backend en Render y frontend en Vercel
-- Lanzar con la liga de Dudo real
 
 ## Fases completadas
 
