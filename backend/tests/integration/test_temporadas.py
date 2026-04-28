@@ -90,3 +90,78 @@ def test_cerrar_temporada_ya_cerrada_falla(client, auth_headers, jugadores_en_db
 
     r = client.post(f"/temporadas/{temporada_id}/cerrar", headers=auth_headers)
     assert r.status_code == 400
+
+
+# ── Phase 6: Reuso de jugador existente al crear temporada ───────────────────
+
+
+def test_crear_temporada_reusa_jugador_existente_por_nombre(client, auth_headers, jugadores_en_db):
+    """Crear temporada con un nombre que YA existe en el catálogo debe REUSAR
+    al jugador existente, no crear duplicado."""
+    pre = client.get("/jugadores").json()
+    assert len(pre) == 3
+    assert sum(1 for j in pre if j["nombre"] == "Ana") == 1
+
+    r = client.post(
+        "/temporadas",
+        json={
+            "nombre": "Liga 2024",
+            "fecha_inicio": "2024-01-01",
+            "jugadores": [{"nombre": "Ana"}],
+        },
+        headers=auth_headers,
+    )
+    assert r.status_code == 201
+
+    post = client.get("/jugadores").json()
+    assert len(post) == 3, "No debería haberse creado un Ana duplicado"
+    assert sum(1 for j in post if j["nombre"] == "Ana") == 1
+
+
+def test_crear_temporada_reuso_es_case_insensitive_con_strip(client, auth_headers, jugadores_en_db):
+    """'  ANA  ' debe reusar al jugador 'Ana' existente (case-insensitive + strip)."""
+    pre = client.get("/jugadores").json()
+    assert len(pre) == 3
+
+    r = client.post(
+        "/temporadas",
+        json={
+            "nombre": "Liga 2024",
+            "fecha_inicio": "2024-01-01",
+            "jugadores": [{"nombre": "  ANA  "}],
+        },
+        headers=auth_headers,
+    )
+    assert r.status_code == 201
+
+    post = client.get("/jugadores").json()
+    nombres = sorted([j["nombre"] for j in post])
+    assert nombres == ["Ana", "Bruno", "Carlos"], "No debería haberse creado '  ANA  ' ni 'ANA'"
+
+
+def test_crear_temporada_mezcla_id_nombre_existente_reusado_y_nombre_nuevo(
+    client, auth_headers, jugadores_en_db
+):
+    """Mezcla: {id: Ana}, {nombre: 'bruno'} (existente case-insensitive), {nombre: 'Diego'} (nuevo)."""
+    id_ana = jugadores_en_db[0].id
+
+    r = client.post(
+        "/temporadas",
+        json={
+            "nombre": "Liga 2024",
+            "fecha_inicio": "2024-01-01",
+            "jugadores": [
+                {"id": id_ana},
+                {"nombre": "bruno"},
+                {"nombre": "Diego"},
+            ],
+        },
+        headers=auth_headers,
+    )
+    assert r.status_code == 201
+
+    post = client.get("/jugadores").json()
+    nombres = sorted([j["nombre"] for j in post])
+    assert nombres == ["Ana", "Bruno", "Carlos", "Diego"], (
+        "Diego debe agregarse, Bruno reusarse, no debe haber duplicados"
+    )

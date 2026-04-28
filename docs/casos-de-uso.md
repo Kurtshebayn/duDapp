@@ -31,3 +31,28 @@ Actor: Administrador. Al finalizar las reuniones, el admin cierra la temporada. 
 ## CU-08 — Compartir liga
 
 Actor: Administrador. El admin puede copiar o compartir un link público de la liga para enviarlo por WhatsApp u otros medios. Quien reciba el link accede directamente a la vista de espectador sin necesidad de cuenta.
+
+## CU-09 — Crear jugador en el catálogo
+
+Actor: Administrador. El admin puede crear un nuevo jugador en el catálogo en cualquier momento, sin necesidad de abrir o estar dentro de una temporada. Desde el dashboard pulsa "+ Nuevo jugador", ingresa el nombre y confirma. El jugador queda disponible en el catálogo y puede ser inscrito posteriormente en cualquier temporada.
+
+Validaciones:
+- El nombre es obligatorio (no puede ser vacío ni solo espacios) → 422.
+- El nombre se normaliza con strip (se eliminan espacios al inicio/fin).
+- No se permiten nombres duplicados case-insensitive ("Juan" == "JUAN" == "  juan  ") → 409.
+
+## CU-10 — Inscribir jugador a la temporada activa
+
+Actor: Administrador. El admin puede sumar un jugador del catálogo a la temporada activa en cualquier momento, incluso después de iniciada y con reuniones jugadas. Desde el dashboard, en cada tarjeta de jugador no inscrito, pulsa "+ Temporada". El jugador queda inscrito y puede aparecer en las próximas reuniones.
+
+Reglas que aplican al jugador tardío:
+- Computa como ausente (0 puntos) en todas las reuniones previas a su inscripción.
+- Su promedio se calcula sobre sus asistencias reales (puntos totales / asistencias), no sobre el total de reuniones de la temporada.
+- Mientras no tenga ninguna asistencia, NO aparece en la tabla de posiciones (regla CU-04 preservada).
+- Las inasistencias del tardío incluyen las reuniones previas a su inscripción (`total_reuniones - asistencias`).
+
+Validaciones:
+- Debe haber una temporada en estado activa → si no, 404.
+- El jugador debe existir en el catálogo → si no, 404.
+- El jugador no debe estar ya inscrito en la temporada activa → si lo está, 409.
+- La temporada cerrada no acepta inscripciones (no hay temporada activa para responder) → 404.

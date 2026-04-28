@@ -21,7 +21,7 @@ Plataforma web para gestionar una liga de Dudo (juego de dados). Un administrado
 - Solo puede existir una temporada activa a la vez
 - Una temporada cerrada es inmutable — no se pueden agregar, editar ni eliminar reuniones
 - En caso de empate al cierre, se resuelve por enfrentamiento directo
-- No se admiten incorporaciones de jugadores a mitad de temporada
+- Se admite incorporar jugadores a la temporada activa después de iniciada. El jugador tardío computa como ausente (0 puntos) en las reuniones previas a su inscripción. Su promedio se calcula sobre sus asistencias reales (puntos / asistencias).
 
 ## Modelo de datos
 

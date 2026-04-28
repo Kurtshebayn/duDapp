@@ -72,5 +72,7 @@
 - Implementar indicador de carga para cold starts (R-01)
 - Implementar script de backup de base de datos (R-03)
 - Documentar proceso de reseteo de contraseña (R-05)
+- Crear jugador desde el dashboard sin necesidad de abrir temporada (CU-09)
+- Inscribir jugadores a la temporada activa después de iniciada, con jugador tardío computado como ausente en reuniones previas (CU-10)
 - Crear el usuario admin inicial en producción
 - Lanzar con la liga de Dudo real

@@ -9,7 +9,8 @@ from app.auth.dependencies import get_current_user
 from app.database import get_db
 from app.models.jugador import Jugador
 from app.models.usuario import Usuario
-from app.schemas.jugador import JugadorResponse
+from app.schemas.jugador import JugadorCreate, JugadorResponse
+from app.services import jugador as jugador_service
 
 router = APIRouter(prefix="/jugadores", tags=["jugadores"])
 
@@ -24,6 +25,15 @@ def _cloudinary_configured() -> bool:
 @router.get("", response_model=list[JugadorResponse])
 def listar_jugadores(db: Session = Depends(get_db)):
     return db.query(Jugador).order_by(Jugador.nombre).all()
+
+
+@router.post("", response_model=JugadorResponse, status_code=201)
+def crear_jugador(
+    body: JugadorCreate,
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(get_current_user),
+):
+    return jugador_service.crear_jugador(db, body.nombre)
 
 
 @router.post("/{id}/foto", response_model=JugadorResponse)

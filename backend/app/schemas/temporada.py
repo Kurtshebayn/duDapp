@@ -18,3 +18,15 @@ class TemporadaResponse(BaseModel):
     estado: str
 
     model_config = {"from_attributes": True}
+
+
+class InscripcionCreate(BaseModel):
+    id_jugador: int
+
+
+class InscripcionResponse(BaseModel):
+    id: int
+    id_temporada: int
+    id_jugador: int
+
+    model_config = {"from_attributes": True}
