@@ -1,6 +1,7 @@
 from datetime import date
 
 from fastapi import HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.inscripcion import Inscripcion
@@ -27,9 +28,18 @@ def crear_temporada(db: Session, nombre: str, fecha_inicio: date, jugadores_inpu
             if not jugador:
                 raise HTTPException(status_code=404, detail=f"Jugador {ji.id} no encontrado")
         else:
-            jugador = Jugador(nombre=ji.nombre)
-            db.add(jugador)
-            db.flush()
+            # Reusa jugador existente case-insensitive con strip; si no existe, lo crea.
+            # Mantiene consistencia con la regla de unicidad del catálogo (POST /jugadores).
+            nombre_normalizado = ji.nombre.strip()
+            jugador = (
+                db.query(Jugador)
+                .filter(func.lower(Jugador.nombre) == nombre_normalizado.lower())
+                .first()
+            )
+            if jugador is None:
+                jugador = Jugador(nombre=nombre_normalizado)
+                db.add(jugador)
+                db.flush()
 
         db.add(Inscripcion(id_temporada=temporada.id, id_jugador=jugador.id))
 
@@ -49,3 +59,41 @@ def cerrar_temporada(db: Session, temporada_id: int) -> Temporada:
     db.commit()
     db.refresh(temporada)
     return temporada
+
+
+def inscribir_jugador_en_activa(db: Session, id_jugador: int) -> Inscripcion:
+    """
+    Inscribe un jugador existente a la temporada activa, después de iniciada.
+
+    Validaciones:
+    - Debe existir una temporada en estado `activa` → si no, 404.
+    - El jugador debe existir → si no, 404.
+    - El jugador no debe estar ya inscrito → si lo está, 409.
+    """
+    temporada = db.query(Temporada).filter(Temporada.estado == EstadoTemporada.activa).first()
+    if not temporada:
+        raise HTTPException(status_code=404, detail="No hay temporada activa")
+
+    jugador = db.query(Jugador).filter(Jugador.id == id_jugador).first()
+    if not jugador:
+        raise HTTPException(status_code=404, detail=f"Jugador {id_jugador} no encontrado")
+
+    ya_inscrito = (
+        db.query(Inscripcion)
+        .filter(
+            Inscripcion.id_temporada == temporada.id,
+            Inscripcion.id_jugador == id_jugador,
+        )
+        .first()
+    )
+    if ya_inscrito is not None:
+        raise HTTPException(
+            status_code=409,
+            detail=f"El jugador '{jugador.nombre}' ya está inscrito en la temporada activa",
+        )
+
+    inscripcion = Inscripcion(id_temporada=temporada.id, id_jugador=id_jugador)
+    db.add(inscripcion)
+    db.commit()
+    db.refresh(inscripcion)
+    return inscripcion

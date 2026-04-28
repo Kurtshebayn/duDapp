@@ -11,7 +11,12 @@ from app.schemas.consultas import (
     TemporadaActivaDetalleResponse,
 )
 from app.schemas.reunion import ReunionCreate, ReunionResponse
-from app.schemas.temporada import TemporadaCreate, TemporadaResponse
+from app.schemas.temporada import (
+    InscripcionCreate,
+    InscripcionResponse,
+    TemporadaCreate,
+    TemporadaResponse,
+)
 from app.services import consultas as consultas_service
 from app.services import reunion as reunion_service
 from app.services import temporada as temporada_service
@@ -48,6 +53,15 @@ def registrar_reunion(
     _: Usuario = Depends(get_current_user),
 ):
     return reunion_service.registrar_reunion(db, temporada_id, body.fecha, body.posiciones)
+
+
+@router.post("/activa/inscripciones", response_model=InscripcionResponse, status_code=201)
+def inscribir_jugador_en_activa(
+    body: InscripcionCreate,
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(get_current_user),
+):
+    return temporada_service.inscribir_jugador_en_activa(db, body.id_jugador)
 
 
 # ── Public endpoints ──────────────────────────────────────────────────────────

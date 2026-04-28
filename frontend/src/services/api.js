@@ -73,3 +73,19 @@ export function subirFotoJugador(token, id, file) {
     body: form,
   })
 }
+
+export function crearJugador(token, nombre) {
+  return apiFetch('/jugadores', {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ nombre }),
+  })
+}
+
+export function inscribirJugadorEnActiva(token, idJugador) {
+  return apiFetch('/temporadas/activa/inscripciones', {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ id_jugador: idJugador }),
+  })
+}

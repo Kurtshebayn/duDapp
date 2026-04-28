@@ -7,12 +7,41 @@ import {
   cerrarTemporada,
   getJugadores,
   subirFotoJugador,
+  crearJugador,
+  inscribirJugadorEnActiva,
 } from '../../services/api'
 import PlayerAvatar from '../../components/PlayerAvatar'
 
 function formatFecha(iso) {
   const [y, m, d] = iso.split('-')
   return `${d}/${m}/${y}`
+}
+
+const modalBackdropStyle = {
+  position: 'fixed',
+  inset: 0,
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1000,
+}
+
+const modalStyle = {
+  background: 'var(--bg, #fff)',
+  borderRadius: '8px',
+  padding: '1.5rem',
+  minWidth: '320px',
+  maxWidth: '90vw',
+  boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+}
+
+const sectionHeaderStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: '0.75rem',
+  marginTop: '1rem',
 }
 
 export default function Dashboard() {
@@ -26,6 +55,15 @@ export default function Dashboard() {
   const [cerrando, setCerrando] = useState(false)
   const [error, setError] = useState(null)
   const [uploadingId, setUploadingId] = useState(null)
+
+  // Modal "Nuevo jugador"
+  const [showNuevoJugador, setShowNuevoJugador] = useState(false)
+  const [nuevoNombre, setNuevoNombre] = useState('')
+  const [creandoJugador, setCreandoJugador] = useState(false)
+  const [errorModal, setErrorModal] = useState(null)
+
+  // Botón "+ A temporada" en cada card
+  const [agregandoId, setAgregandoId] = useState(null)
 
   const cargar = useCallback(async () => {
     const [t, r, j] = await Promise.all([
@@ -82,7 +120,59 @@ export default function Dashboard() {
     }
   }
 
+  function abrirModalNuevoJugador() {
+    setNuevoNombre('')
+    setErrorModal(null)
+    setShowNuevoJugador(true)
+  }
+
+  function cerrarModalNuevoJugador() {
+    if (creandoJugador) return
+    setShowNuevoJugador(false)
+    setNuevoNombre('')
+    setErrorModal(null)
+  }
+
+  async function handleCrearJugador(e) {
+    e.preventDefault()
+    const nombre = nuevoNombre.trim()
+    if (!nombre) {
+      setErrorModal('El nombre es obligatorio')
+      return
+    }
+    setCreandoJugador(true)
+    setErrorModal(null)
+    try {
+      await crearJugador(token, nombre)
+      setShowNuevoJugador(false)
+      setNuevoNombre('')
+      await cargar()
+    } catch (err) {
+      setErrorModal(err.message)
+    } finally {
+      setCreandoJugador(false)
+    }
+  }
+
+  async function handleAgregarATemporada(jugadorId) {
+    setAgregandoId(jugadorId)
+    setError(null)
+    try {
+      const result = await inscribirJugadorEnActiva(token, jugadorId)
+      if (!result) {
+        throw new Error('No se pudo inscribir el jugador (404).')
+      }
+      await cargar()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setAgregandoId(null)
+    }
+  }
+
   if (temporada === undefined) return <p className="status">Cargando...</p>
+
+  const inscritosIds = new Set((temporada?.jugadores ?? []).map((j) => j.id))
 
   return (
     <>
@@ -165,14 +255,41 @@ export default function Dashboard() {
       )}
 
       {/* ── Jugadores ──────────────────────────────────────────────── */}
-      {jugadores.length > 0 && (
-        <>
-          <h1>Jugadores</h1>
-          <div className="jugadores-grid">
-            {jugadores.map((j) => (
+      <div style={sectionHeaderStyle}>
+        <h1 style={{ margin: 0 }}>Jugadores</h1>
+        <button
+          type="button"
+          className="btn btn-primary btn-sm"
+          onClick={abrirModalNuevoJugador}
+        >
+          + Nuevo jugador
+        </button>
+      </div>
+
+      {jugadores.length === 0 ? (
+        <p style={{ color: 'var(--text-muted)', marginTop: '0.75rem' }}>
+          Aún no hay jugadores en el catálogo.
+        </p>
+      ) : (
+        <div className="jugadores-grid">
+          {jugadores.map((j) => {
+            const yaInscrito = inscritosIds.has(j.id)
+            return (
               <div key={j.id} className="jugador-card">
                 <PlayerAvatar nombre={j.nombre} fotoUrl={j.foto_url} size={48} />
                 <span className="jugador-card-nombre">{j.nombre}</span>
+                {temporada && !yaInscrito && (
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    title="Agregar a la temporada activa"
+                    disabled={agregandoId === j.id}
+                    onClick={() => handleAgregarATemporada(j.id)}
+                    style={{ fontSize: '0.78rem' }}
+                  >
+                    {agregandoId === j.id ? '…' : '+ Temporada'}
+                  </button>
+                )}
                 <button
                   type="button"
                   className="btn-foto"
@@ -183,9 +300,58 @@ export default function Dashboard() {
                   {uploadingId === j.id ? '…' : '📷'}
                 </button>
               </div>
-            ))}
+            )
+          })}
+        </div>
+      )}
+
+      {/* ── Modal Nuevo Jugador ────────────────────────────────────── */}
+      {showNuevoJugador && (
+        <div style={modalBackdropStyle} onClick={cerrarModalNuevoJugador}>
+          <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ marginTop: 0 }}>Nuevo jugador</h2>
+            <form onSubmit={handleCrearJugador}>
+              <input
+                type="text"
+                placeholder="Nombre del jugador"
+                value={nuevoNombre}
+                onChange={(e) => setNuevoNombre(e.target.value)}
+                autoFocus
+                disabled={creandoJugador}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem 0.75rem',
+                  marginBottom: '0.75rem',
+                  border: '1px solid var(--border, #ccc)',
+                  borderRadius: '4px',
+                  fontSize: '1rem',
+                }}
+              />
+              {errorModal && (
+                <div className="alert alert-error" style={{ marginBottom: '0.75rem' }}>
+                  {errorModal}
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={cerrarModalNuevoJugador}
+                  disabled={creandoJugador}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-sm"
+                  disabled={creandoJugador || !nuevoNombre.trim()}
+                >
+                  {creandoJugador ? 'Creando...' : 'Crear'}
+                </button>
+              </div>
+            </form>
           </div>
-        </>
+        </div>
       )}
     </>
   )
