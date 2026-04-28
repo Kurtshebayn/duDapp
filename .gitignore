@@ -33,7 +33,8 @@ ENV/
 .pytest_cache/
 .coverage
 htmlcov/
-*.db          # SQLite de tests
+# SQLite de tests/desarrollo
+*.db
 
 # mypy
 .mypy_cache/
