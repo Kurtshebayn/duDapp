@@ -18,6 +18,6 @@ class ReunionResponse(BaseModel):
     id: int
     id_temporada: int
     numero_jornada: int
-    fecha: date
+    fecha: date | None
 
     model_config = {"from_attributes": True}

@@ -240,3 +240,68 @@ def test_estadisticas_mas_inasistencias(client, escenario):
 def test_estadisticas_sin_temporada_activa_retorna_404(client):
     r = client.get("/temporadas/activa/estadisticas")
     assert r.status_code == 404
+
+
+# ── REQ-IMP-29: nullable fecha serialization ──────────────────────────────────
+
+
+def test_reunion_con_fecha_null_serializa_como_null_en_lista_reuniones(client, db, admin_user):
+    """Regression: Reunion.fecha=None must appear as JSON null, not omitted or replaced."""
+    from app.models.reunion import Reunion
+    from app.models.temporada import EstadoTemporada, Temporada
+
+    headers = _auth_headers(client)
+
+    # Create an active season
+    r = client.post(
+        "/temporadas",
+        json={"nombre": "Liga Null Fecha", "fecha_inicio": "2024-01-01",
+              "jugadores": [{"nombre": "PepeNull"}]},
+        headers=headers,
+    )
+    temporada_id = r.json()["id"]
+
+    # Insert a Reunion with fecha=None directly (bypasses the normal endpoint
+    # which still requires fecha — only the import path produces null dates)
+    reunion = Reunion(id_temporada=temporada_id, numero_jornada=1, fecha=None)
+    db.add(reunion)
+    db.commit()
+    db.refresh(reunion)
+
+    # The public list endpoint must return fecha as null
+    r = client.get("/temporadas/activa/reuniones")
+    assert r.status_code == 200
+    data = r.json()
+    assert len(data) == 1
+    assert data[0]["fecha"] is None, f"Expected null fecha, got {data[0]['fecha']!r}"
+
+
+def test_reunion_con_fecha_null_serializa_como_null_en_resultados_reunion(client, db, admin_user):
+    """Regression: ReunionResultadosResponse.fecha must be null for imported reunions."""
+    from app.models.posicion import Posicion
+    from app.models.reunion import Reunion
+    from app.models.temporada import EstadoTemporada, Temporada
+
+    headers = _auth_headers(client)
+
+    r = client.post(
+        "/temporadas",
+        json={"nombre": "Liga Null Fecha 2", "fecha_inicio": "2024-01-01",
+              "jugadores": [{"nombre": "PepeNull2"}]},
+        headers=headers,
+    )
+    temporada_id = r.json()["id"]
+
+    reunion = Reunion(id_temporada=temporada_id, numero_jornada=1, fecha=None)
+    db.add(reunion)
+    db.flush()
+    posicion = Posicion(id_reunion=reunion.id, id_jugador=None, es_invitado=True,
+                        posicion=1, puntos=15)
+    db.add(posicion)
+    db.commit()
+    db.refresh(reunion)
+
+    r = client.get(f"/reuniones/{reunion.id}")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["fecha"] is None, f"Expected null fecha, got {data['fecha']!r}"

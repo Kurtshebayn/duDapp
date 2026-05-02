@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { getReuniones } from '../services/api'
 
 function formatFecha(iso) {
+  if (!iso) return 'Sin fecha'
   const [y, m, d] = iso.split('-')
   return `${d}/${m}/${y}`
 }
