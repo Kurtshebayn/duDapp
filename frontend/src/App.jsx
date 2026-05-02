@@ -11,6 +11,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/admin/Dashboard'
 import CrearTemporada from './pages/admin/CrearTemporada'
 import GestionReunion from './pages/admin/GestionReunion'
+import ImportarTemporada from './pages/admin/ImportarTemporada'
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="/admin/temporada/nueva" element={<ProtectedRoute><CrearTemporada /></ProtectedRoute>} />
             <Route path="/admin/reuniones/nueva" element={<ProtectedRoute><GestionReunion modo="crear" /></ProtectedRoute>} />
             <Route path="/admin/reuniones/:id/editar" element={<ProtectedRoute><GestionReunion modo="editar" /></ProtectedRoute>} />
+            <Route path="/admin/importar-temporada" element={<ProtectedRoute><ImportarTemporada /></ProtectedRoute>} />
           </Routes>
         </main>
       </BrowserRouter>

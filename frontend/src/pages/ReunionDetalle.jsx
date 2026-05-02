@@ -4,6 +4,7 @@ import { getResultadosReunion } from '../services/api'
 import PlayerAvatar from '../components/PlayerAvatar'
 
 function formatFecha(iso) {
+  if (!iso) return 'Sin fecha'
   const [y, m, d] = iso.split('-')
   return `${d}/${m}/${y}`
 }

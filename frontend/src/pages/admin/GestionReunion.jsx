@@ -36,7 +36,7 @@ export default function GestionReunion({ modo }) {
         if (modo === 'editar') {
           const reunion = await getResultadosReunion(reunionId)
           if (!reunion) { navigate('/admin'); return }
-          setFecha(reunion.fecha)
+          setFecha(reunion.fecha ?? hoy())
           const iniciales = reunion.posiciones.map((p) => ({
             posicion: p.posicion,
             id_jugador: p.id_jugador,

@@ -34,14 +34,14 @@ class PosicionResultadoResponse(BaseModel):
 class ReunionResultadosResponse(BaseModel):
     id: int
     numero_jornada: int
-    fecha: date
+    fecha: date | None
     posiciones: list[PosicionResultadoResponse]
 
 
 class ReunionResumenResponse(BaseModel):
     id: int
     numero_jornada: int
-    fecha: date
+    fecha: date | None
 
     model_config = {"from_attributes": True}
 

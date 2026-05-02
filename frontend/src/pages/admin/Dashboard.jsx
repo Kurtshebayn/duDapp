@@ -13,6 +13,7 @@ import {
 import PlayerAvatar from '../../components/PlayerAvatar'
 
 function formatFecha(iso) {
+  if (!iso) return 'Sin fecha'
   const [y, m, d] = iso.split('-')
   return `${d}/${m}/${y}`
 }
@@ -186,6 +187,13 @@ export default function Dashboard() {
 
       {error && <div className="alert alert-error">{error}</div>}
 
+      {/* ── Acciones administrativas (siempre visibles) ────────────── */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
+        <Link to="/admin/importar-temporada" className="btn btn-secondary btn-sm">
+          Importar temporada histórica
+        </Link>
+      </div>
+
       {/* ── Temporada ──────────────────────────────────────────────── */}
       {!temporada ? (
         <div className="empty-state">
@@ -221,9 +229,11 @@ export default function Dashboard() {
                 </button>
               </div>
             </div>
-            <Link to="/admin/reuniones/nueva" className="btn btn-primary btn-sm">
-              + Registrar reunión
-            </Link>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <Link to="/admin/reuniones/nueva" className="btn btn-primary btn-sm">
+                + Registrar reunión
+              </Link>
+            </div>
           </div>
 
           <h1>Reuniones</h1>

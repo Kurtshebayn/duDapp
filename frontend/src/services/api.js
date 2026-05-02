@@ -5,7 +5,25 @@ async function apiFetch(path, options = {}) {
   if (r.status === 404) return null
   if (!r.ok) {
     const body = await r.json().catch(() => ({}))
-    throw new Error(body.detail || `Error ${r.status}`)
+    // Derive a readable string for backward-compatible err.message:
+    // - If detail is a plain string, use it directly
+    // - If detail is a dict with a message field, use that
+    // - If detail is something else (Pydantic array, etc.), fall back to generic
+    const detail = body.detail
+    let message
+    if (typeof detail === 'string') {
+      message = detail
+    } else if (detail && typeof detail === 'object' && !Array.isArray(detail) && detail.message) {
+      message = detail.message
+    } else if (detail && typeof detail === 'object' && !Array.isArray(detail) && detail.code) {
+      message = detail.code
+    } else {
+      message = `Error ${r.status}`
+    }
+    const err = new Error(message)
+    err.body = body       // full parsed body for structured error rendering
+    err.status = r.status
+    throw err
   }
   return r.json()
 }
@@ -87,5 +105,14 @@ export function inscribirJugadorEnActiva(token, idJugador) {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify({ id_jugador: idJugador }),
+  })
+}
+
+export function importarTemporada(token, formData) {
+  // Do NOT set Content-Type — the browser sets multipart/form-data with boundary automatically
+  return apiFetch('/temporadas/import', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
   })
 }
