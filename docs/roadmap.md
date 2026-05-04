@@ -10,7 +10,7 @@
 - Crear modelos de base de datos (Usuario, Jugador, Temporada, Inscripción, Reunión, Posición)
 - Implementar migraciones de schema (Alembic)
 - Implementar autenticación JWT (login del admin)
-- Desplegar en Render con PostgreSQL — validar que responde
+- Desplegar backend en Render, conectar a PostgreSQL en Neon — validar que responde
 
 **Victoria temprana:** el backend está vivo en internet y el admin puede loguearse.
 
@@ -70,7 +70,7 @@
 
 - Probar drag & drop en dispositivos móviles reales (R-04)
 - Implementar indicador de carga para cold starts (R-01)
-- Implementar script de backup de base de datos (R-03)
+- ~~Implementar script de backup de base de datos (R-03)~~ ✓ completado
 - Documentar proceso de reseteo de contraseña (R-05)
 - Crear jugador desde el dashboard sin necesidad de abrir temporada (CU-09)
 - Inscribir jugadores a la temporada activa después de iniciada, con jugador tardío computado como ausente en reuniones previas (CU-10)

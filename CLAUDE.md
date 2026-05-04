@@ -8,7 +8,7 @@ Plataforma web para gestionar una liga de Dudo (juego de dados). Un administrado
 
 - **Backend:** FastAPI (Python) desplegado en Render
 - **Frontend:** React (SPA) desplegado en Vercel
-- **Base de datos:** PostgreSQL en Render
+- **Base de datos:** PostgreSQL en Neon (serverless)
 - **Autenticación:** JWT propia (un solo admin)
 - **ORM:** SQLAlchemy con migraciones Alembic
 
@@ -83,7 +83,6 @@ Variables esperadas:
 Objetivo: preparar para uso real.
 - Probar drag & drop en dispositivos móviles reales (R-04)
 - Implementar indicador de carga para cold starts (R-01)
-- Implementar script de backup de base de datos (R-03)
 - Documentar proceso de reseteo de contraseña (R-05)
 - Desplegar backend en Render y frontend en Vercel
 

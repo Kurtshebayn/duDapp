@@ -20,15 +20,15 @@
 
 **Mitigación:** Configurar CORS como una de las primeras tareas del backend, antes de implementar cualquier lógica de negocio. Documentar la configuración exacta en el proyecto. Validar con una request de prueba simple antes de avanzar.
 
-## R-03 — Pérdida de datos en PostgreSQL gratuito
+## R-03 — Backup periódico de la base de datos (Neon)
 
-**Riesgo:** El tier gratuito de PostgreSQL en Render tiene limitaciones — la base de datos se elimina después de 90 días de inactividad y no incluye backups automáticos. Si hay un problema, se pierde toda la información de la liga.
+**Riesgo:** Neon (tier gratuito) no tiene auto-delete por inactividad, pero no incluye backups automáticos exportables a destinos externos (solo PITR de 24 horas). Ante un incidente grave de la cuenta, error humano o caída del proveedor, los datos podrían perderse sin un backup externo reciente.
 
-**Probabilidad:** Baja (mientras el proyecto esté activo).
+**Probabilidad:** Baja.
 
 **Impacto:** Crítico. Perder una temporada entera de datos no tiene vuelta atrás.
 
-**Mitigación:** Implementar un script simple de backup periódico que exporte la base de datos (pg_dump) y la almacene en algún lugar seguro (Google Drive, por ejemplo). Ejecutarlo manualmente al menos una vez por semana durante temporada activa. A futuro, automatizarlo.
+**Estado:** Mitigado. Script `backend/scripts/backup_db.py` implementado (pg_dump → archivo local). Ejecutar manualmente al menos una vez por semana durante temporada activa. Cleanup de datos sensibles completado el 2026-05-01.
 
 ## R-04 — Drag & drop deficiente en móvil
 

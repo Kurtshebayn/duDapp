@@ -56,14 +56,14 @@
 **Contexto:** El modelo de datos es relacional con entidades claramente definidas (temporadas, reuniones, posiciones, jugadores). Se necesitan consultas estadísticas (promedios, rankings, conteos).
 
 **Opciones evaluadas:**
-- PostgreSQL — robusto, consultas estadísticas complejas con SQL, tier gratuito en Render
+- PostgreSQL — robusto, consultas estadísticas complejas con SQL, tier gratuito en Neon (serverless)
 - SQLite — sin servidor, cero configuración, pero limitado en concurrencia y despliegue
 
 **Decisión:** PostgreSQL.
 
-**Justificación:** Las estadísticas derivadas (promedios de puntos, rankings, conteos de asistencias) son naturales en SQL y PostgreSQL las resuelve eficientemente. SQLite habría requerido migración futura al agregar tiempo real o escalar. Render ofrece PostgreSQL gratuito junto al backend, simplificando la operación. El costo extra de configuración respecto a SQLite es mínimo.
+**Justificación:** Las estadísticas derivadas (promedios de puntos, rankings, conteos de asistencias) son naturales en SQL y PostgreSQL las resuelve eficientemente. SQLite habría requerido migración futura al agregar tiempo real o escalar. Neon ofrece PostgreSQL serverless con tier gratuito estable (sin auto-delete) y escala a cero automáticamente. El costo extra de configuración respecto a SQLite es mínimo.
 
-**Consecuencias:** Se requiere un servicio de hosting para la base de datos (Render). Se necesita gestionar migraciones de schema. La conexión entre backend y base de datos agrega una dependencia de red.
+**Consecuencias:** Se requiere un servicio de hosting para la base de datos (Neon). Se necesita gestionar migraciones de schema. La conexión entre backend (Render) y base de datos (Neon) agrega una dependencia de red entre proveedores.
 
 ---
 
@@ -95,6 +95,8 @@
 - Railway para backend — tier gratuito más limitado que Render
 
 **Decisión:** Vercel para frontend, Render para backend y PostgreSQL.
+
+**Nota (2026-04-26):** La decisión de alojar PostgreSQL en Render fue supersedida por ADR-09. El backend sigue en Render; la base de datos migró a Neon. Ver ADR-09.
 
 **Justificación:** Vercel está optimizado para SPAs con despliegue automático desde GitHub y CDN global. Render permite tener backend FastAPI y PostgreSQL en el mismo proveedor con tier gratuito, simplificando la operación. Ambos se integran con GitHub para despliegue automático.
 
@@ -133,3 +135,27 @@
 **Justificación:** SDD asegura que toda decisión técnica nace de una especificación clara, lo cual es crítico para el desarrollo con agentes — los agentes trabajan mejor con instrucciones precisas. TDD complementa esto traduciendo las especificaciones en tests antes de escribir implementación, creando una red de seguridad que detecta regresiones y valida que el comportamiento cumple las reglas de negocio (cálculo de puntos, visibilidad de jugadores, restricciones de temporada). El costo inicial mayor se compensa con menos bugs y refactoring más seguro.
 
 **Consecuencias:** El desarrollo inicial es más lento. Se necesita diseñar la estrategia de testing antes de implementar. El código debe estructurarse para ser testeable (inyección de dependencias, separación de lógica de negocio). Se requiere infraestructura de testing (framework, base de datos de pruebas).
+
+---
+
+## ADR-09 — Migración de base de datos: de Render PostgreSQL a Neon
+
+**Estado:** Aceptado (2026-04-26). Supersede la porción "DB hosting" de ADR-06.
+
+**Contexto:** El tier gratuito de PostgreSQL en Render estaba programado para ser eliminado en mayo 2026. El proyecto dependía de ese tier para la base de datos de producción (ADR-06). Se necesitaba un proveedor con tier gratuito estable (sin auto-delete por inactividad) y backups básicos disponibles. El backend seguiría en Render (compute); solo la base de datos cambiaba de proveedor.
+
+**Opciones evaluadas:**
+- Neon — PostgreSQL serverless, scale-to-zero, tier gratuito sin auto-delete, PITR de 24h, conexión vía `DATABASE_URL` estándar sin cambios de código
+- Supabase — PostgreSQL administrado, tier gratuito, pero pausa el proyecto tras 7 días de inactividad
+- Railway — PostgreSQL, tier gratuito limitado (500 horas/mes), menos estable para proyectos durmientes
+- Render tier pago — resuelve el problema pero introduce costo mensual
+
+**Decisión:** Migrar la base de datos a Neon (PostgreSQL serverless).
+
+**Justificación:** Neon ofrece el único tier gratuito sin auto-delete entre las opciones evaluadas. El scale-to-zero de Neon (~5 segundos de cold start en la primera conexión tras inactividad) es un trade-off aceptable frente a la alternativa de perder los datos. La migración no requirió cambios de código — solo actualizar `DATABASE_URL`. El desarrollo local sigue usando SQLite como fallback (vía `config.py`), sin impacto en el workflow de desarrollo.
+
+**Consecuencias:**
+- Backend (Render) y base de datos (Neon) ahora viven en proveedores distintos. Latencia de red entre compute y DB es mínima pero existe.
+- La primera query tras un período de inactividad puede tomar ~5 segundos adicionales por el cold start de Neon.
+- El desarrollo local sigue funcionando con SQLite fallback en `config.py` — sin cambios.
+- Backups automáticos siguen siendo responsabilidad del operador (ver R-03 y `backend/scripts/backup_db.py`).

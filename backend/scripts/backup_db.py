@@ -11,7 +11,7 @@ Variables de entorno requeridas:
     DATABASE_URL — conexión a PostgreSQL (postgresql://user:pass@host/dbname)
 
 Requiere que pg_dump esté instalado en el sistema.
-En Render, correr desde una máquina local apuntando a la DB de producción.
+Correr desde una máquina local con DATABASE_URL apuntando a la DB de producción (Neon).
 """
 
 import os

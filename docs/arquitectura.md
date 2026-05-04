@@ -14,7 +14,7 @@ API REST que expone los endpoints necesarios para todas las operaciones del sist
 
 ### Base de datos — PostgreSQL
 
-Almacena toda la información persistente: jugadores, temporadas, reuniones, posiciones y puntos. Las consultas de estadísticas (promedios, conteos, rankings) se resuelven directamente con SQL. Hospedada en Render.
+Almacena toda la información persistente: jugadores, temporadas, reuniones, posiciones y puntos. Las consultas de estadísticas (promedios, conteos, rankings) se resuelven directamente con SQL. Hospedada en Neon (serverless PostgreSQL).
 
 ## Flujo de datos
 
