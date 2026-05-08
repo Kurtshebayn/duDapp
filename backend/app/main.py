@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import CORS_ORIGINS
 from app.database import Base, SessionLocal, engine
-from app.routers import auth, jugadores, reuniones, temporadas
+from app.routers import auth, historico, jugadores, reuniones, temporadas
 
 
 def _setup_admin() -> None:
@@ -59,6 +59,7 @@ app.include_router(auth.router)
 app.include_router(temporadas.router)
 app.include_router(reuniones.router)
 app.include_router(jugadores.router)
+app.include_router(historico.router)
 
 
 @app.get("/health")
