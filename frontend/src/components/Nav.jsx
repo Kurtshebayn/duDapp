@@ -17,6 +17,7 @@ export default function Nav() {
         <NavLink to="/ranking">Ranking</NavLink>
         <NavLink to="/reuniones">Reuniones</NavLink>
         <NavLink to="/estadisticas">Estadísticas</NavLink>
+        <NavLink to="/historico">Histórico</NavLink>
         {isAuthenticated ? (
           <>
             <NavLink to="/admin">Admin</NavLink>

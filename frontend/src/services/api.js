@@ -40,6 +40,8 @@ export const getEstadisticas = () => apiFetch('/temporadas/activa/estadisticas')
 export const getResultadosReunion = (id) => apiFetch(`/reuniones/${id}`)
 export const getTemporadaActiva = () => apiFetch('/temporadas/activa')
 export const getJugadores = () => apiFetch('/jugadores')
+export const getHistoricoResumen = () => apiFetch('/historico/resumen')
+export const getHeadToHead = (jugadorId) => apiFetch(`/historico/head-to-head/${jugadorId}`)
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
 

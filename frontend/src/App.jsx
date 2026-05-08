@@ -12,6 +12,7 @@ import Dashboard from './pages/admin/Dashboard'
 import CrearTemporada from './pages/admin/CrearTemporada'
 import GestionReunion from './pages/admin/GestionReunion'
 import ImportarTemporada from './pages/admin/ImportarTemporada'
+import Historico from './pages/Historico'
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="/reuniones" element={<Reuniones />} />
             <Route path="/reuniones/:id" element={<ReunionDetalle />} />
             <Route path="/estadisticas" element={<Estadisticas />} />
+            <Route path="/historico" element={<Historico />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/admin/temporada/nueva" element={<ProtectedRoute><CrearTemporada /></ProtectedRoute>} />
