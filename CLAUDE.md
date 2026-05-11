@@ -82,11 +82,10 @@ Variables esperadas:
 
 App ya en producción (Render + Vercel + Neon). Backlog priorizado (orden recomendado):
 
-1. **Cleanup dead code `/estadisticas`** — refactor chico, sin riesgo.
-2. **Position snapshots backend** — habilita narrativas tipo "sube 1", "racha de 3", "líder desde J-09".
-3. **Avatar de ganador en lista pública de Reuniones** — depende del endpoint enriquecido por (2).
-4. **UI de desempate al cierre de temporada** — requiere `id_campeon` en `Temporada` + admin flow post-cierre (topic engram: `dudapp/backlog/season-tiebreaker-admin-flow`).
-5. **Test suite frontend** — Vitest + React Testing Library; el más costoso y menos urgente.
+1. **Position snapshots backend** — habilita narrativas tipo "sube 1", "racha de 3", "líder desde J-09".
+2. **Avatar de ganador en lista pública de Reuniones** — depende del endpoint enriquecido por (1).
+3. **UI de desempate al cierre de temporada** — requiere `id_campeon` en `Temporada` + admin flow post-cierre (topic engram: `dudapp/backlog/season-tiebreaker-admin-flow`).
+4. **Test suite frontend** — Vitest + React Testing Library; el más costoso y menos urgente.
 
 Notas:
 - R-05 (documentar reset de contraseña) está **fuera de scope** por decisión explícita del usuario. No proponerlo en backlogs futuros aunque siga apareciendo en docs antiguas.
@@ -117,5 +116,6 @@ App desplegada a producción (Render + Vercel + Neon, 2026-05-11). Drag & drop v
 - **bulk-import-temporadas** — endpoint admin de importación CSV para 5 temporadas históricas previas al sistema.
 - **historico-aggregations** — vista pública de estadísticas cross-temporadas (PR #4, shipped 2026-05-05).
 - **sync-docs-to-post-neon-state** — docs y ADRs sincronizados con la migración Render→Neon (2026-05-03).
+- **cleanup-estadisticas** — vista pública `/estadisticas` y endpoint `/temporadas/activa/estadisticas` eliminados; `/ranking` cubre el caso de uso tras la unificación del redesign (PR #6, shipped 2026-05-11). Item 1 del backlog Phase 7.
 
 Ver /docs/roadmap.md para detalle completo.
