@@ -1,34 +1,38 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import DiceIcon from './DiceIcon'
+import UserPill from './UserPill'
 
+/**
+ * Header de la app. Renderiza un grid de 3 columnas:
+ *   [spacer · nav pill centrada · user-pill (solo si hay sesión)]
+ *
+ * En mobile el spacer colapsa, la nav se centra y la user-pill se reduce
+ * a solo el avatar. Por debajo de 420px desaparece el texto "Liga de Dudo"
+ * para que las 3 tabs siempre quepan.
+ */
 export default function Nav() {
-  const { isAuthenticated, logout } = useAuth()
-  const navigate = useNavigate()
-
-  function handleLogout() {
-    logout()
-    navigate('/ranking')
-  }
+  const { isAuthenticated } = useAuth()
 
   return (
-    <nav>
-      <NavLink to="/ranking" className="nav-brand">🎲 Liga de Dudo</NavLink>
-      <div className="nav-links">
-        <NavLink to="/ranking">Ranking</NavLink>
-        <NavLink to="/reuniones">Reuniones</NavLink>
-        <NavLink to="/estadisticas">Estadísticas</NavLink>
-        <NavLink to="/historico">Histórico</NavLink>
-        {isAuthenticated ? (
-          <>
-            <NavLink to="/admin">Admin</NavLink>
-            <button onClick={handleLogout} className="nav-logout">
-              Salir
-            </button>
-          </>
-        ) : (
-          <NavLink to="/login">Admin</NavLink>
-        )}
-      </div>
-    </nav>
+    <header className="app-header">
+      <div className="app-header-spacer" aria-hidden="true" />
+
+      <nav className="nav-pill" aria-label="Navegación principal">
+        <NavLink to="/ranking" className="brand" end>
+          <DiceIcon size={26} className="brand-dice" />
+          <span className="brand-name">Liga de Dudo</span>
+        </NavLink>
+        <NavLink to="/ranking" className="tab" end>Posiciones</NavLink>
+        <NavLink to="/reuniones" className="tab">Reuniones</NavLink>
+        <NavLink to="/historico" className="tab">Histórico</NavLink>
+      </nav>
+
+      {isAuthenticated ? (
+        <UserPill />
+      ) : (
+        <NavLink to="/login" className="admin-link-pill">Admin</NavLink>
+      )}
+    </header>
   )
 }

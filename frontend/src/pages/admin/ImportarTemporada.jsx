@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
 import { importarTemporada } from '../../services/api'
+import PageHeader from '../../components/PageHeader'
 
 function hoy() {
   return new Date().toISOString().slice(0, 10)
@@ -10,11 +11,11 @@ function hoy() {
 function ErrorPanel({ error }) {
   if (!error) return null
 
-  // Pydantic validation errors come as an array under body.detail
+  // Pydantic validation errors come as an array
   if (Array.isArray(error)) {
     return (
       <div className="alert alert-error">
-        <p>Error de validación:</p>
+        <p><strong>Error de validación:</strong></p>
         <ul>
           {error.map((e, i) => (
             <li key={i}>
@@ -28,23 +29,14 @@ function ErrorPanel({ error }) {
 
   switch (error.code) {
     case 'temporada_duplicada':
-      return (
-        <div className="alert alert-error">
-          {error.message}
-        </div>
-      )
+      return <div className="alert alert-error">{error.message}</div>
 
     case 'jugadores_no_resueltos':
       return (
         <div className="alert alert-error">
-          <p>
-            Estos jugadores del CSV no existen en el catálogo. Creálos primero desde el
-            dashboard:
-          </p>
+          <p>Estos jugadores del CSV no existen en el catálogo. Creálos primero desde el dashboard:</p>
           <ul>
-            {(error.nombres ?? []).map((n) => (
-              <li key={n}>{n}</li>
-            ))}
+            {(error.nombres ?? []).map((n) => <li key={n}>{n}</li>)}
           </ul>
         </div>
       )
@@ -79,47 +71,38 @@ function ErrorPanel({ error }) {
     case 'puntajes_duplicados':
       return (
         <div className="alert alert-error">
-          Fila {error.fila}: dos jugadores tienen el mismo puntaje ({error.valor}). Revisá
-          la planilla — en Dudo cada posición tiene un puntaje único.
+          Fila {error.fila}: dos jugadores tienen el mismo puntaje ({error.valor}). Revisá la planilla — en Dudo cada posición tiene un puntaje único.
         </div>
       )
 
     case 'reunion_todos_ausentes':
       return (
         <div className="alert alert-error">
-          Fila {error.fila}: todos los jugadores tienen puntaje 0. Una reunión sin
-          asistentes no es válida.
+          Fila {error.fila}: todos los jugadores tienen puntaje 0. Una reunión sin asistentes no es válida.
         </div>
       )
 
     case 'campeon_no_inscripto':
-      return (
-        <div className="alert alert-error">
-          {error.message}
-        </div>
-      )
+      return <div className="alert alert-error">{error.message}</div>
 
     case 'csv_header_duplicate':
       return (
         <div className="alert alert-error">
-          El CSV tiene un encabezado duplicado: <strong>{error.nombre}</strong>. Cada
-          columna debe tener un nombre único.
+          El CSV tiene un encabezado duplicado: <strong>{error.nombre}</strong>. Cada columna debe tener un nombre único.
         </div>
       )
 
     case 'csv_encoding_invalid':
       return (
         <div className="alert alert-error">
-          El archivo no pudo leerse como UTF-8. Guardá el CSV con codificación UTF-8 desde
-          tu editor o Google Sheets.
+          El archivo no pudo leerse como UTF-8. Guardá el CSV con codificación UTF-8 desde tu editor o Google Sheets.
         </div>
       )
 
     case 'csv_invalido':
       return (
         <div className="alert alert-error">
-          El archivo no tiene una estructura CSV válida. Verificá que sea un archivo de
-          texto con encabezados y filas de datos.
+          El archivo no tiene una estructura CSV válida. Verificá que sea un archivo de texto con encabezados y filas de datos.
         </div>
       )
 
@@ -131,11 +114,7 @@ function ErrorPanel({ error }) {
       )
 
     case 'frontend':
-      return (
-        <div className="alert alert-error">
-          {error.message}
-        </div>
-      )
+      return <div className="alert alert-error">{error.message}</div>
 
     default:
       return (
@@ -148,6 +127,7 @@ function ErrorPanel({ error }) {
 
 export default function ImportarTemporada() {
   const { token } = useAuth()
+  const navigate = useNavigate()
 
   const [nombre, setNombre] = useState('')
   const [fechaInicio, setFechaInicio] = useState(hoy())
@@ -177,16 +157,12 @@ export default function ImportarTemporada() {
       const data = await importarTemporada(token, form)
       setResumen(data.resumen_import)
     } catch (err) {
-      // err.body is the full parsed JSON body (set by the patched apiFetch)
       const detail = err.body?.detail
       if (Array.isArray(detail)) {
-        // Pydantic validation error array
         setError(detail)
       } else if (detail && typeof detail === 'object') {
-        // Our structured dict error: { code, message, ... }
         setError(detail)
       } else {
-        // Fallback: plain string or no body
         setError({ code: 'unknown', message: err.message })
       }
     } finally {
@@ -194,57 +170,67 @@ export default function ImportarTemporada() {
     }
   }
 
+  // ── Success state ──────────────────────────────────────────────────
   if (resumen) {
     return (
-      <>
-        <h1>Importación completada</h1>
-        <div className="season-card">
-          <div className="season-card-header">
-            <div className="season-name">Resumen de importación</div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '1rem' }}>
-            <div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Jugadores inscriptos</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{resumen.jugadores_inscriptos}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Reuniones creadas</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{resumen.reuniones_creadas}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Posiciones creadas</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{resumen.posiciones_creadas}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Invitados inferidos</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{resumen.invitados_inferidos}</div>
-            </div>
-          </div>
-        </div>
-        <div style={{ marginTop: '1.5rem' }}>
-          <Link to="/admin" className="btn btn-primary">
+      <section className="editorial-page admin-form-page">
+        <Link to="/admin" className="back-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          Volver al panel
+        </Link>
+
+        <PageHeader
+          eyebrow="Importación · Completada"
+          title={<>Listo,<br /><span className="ital">importada.</span></>}
+          description={`La temporada "${nombre}" se importó correctamente y quedó cerrada.`}
+          meta={[
+            { label: 'Jugadores', value: resumen.jugadores_inscriptos },
+            { label: 'Reuniones', value: resumen.reuniones_creadas },
+            { label: 'Posiciones', value: resumen.posiciones_creadas },
+            { label: 'Invitados', value: resumen.invitados_inferidos },
+          ]}
+        />
+
+        <div className="form-actions form-actions-spaced">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => navigate('/admin')}
+          >
             Volver al dashboard
-          </Link>
+          </button>
         </div>
-      </>
+      </section>
     )
   }
 
+  // ── Form state ─────────────────────────────────────────────────────
   return (
-    <>
-      <h1>Importar temporada histórica</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Importá una temporada cerrada desde un archivo CSV exportado de Google Sheets.
-        La temporada se creará con estado <strong>cerrada</strong> y no afectará a la
-        temporada activa actual.
-      </p>
+    <section className="editorial-page admin-form-page">
+      <Link to="/admin" className="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+        Volver al panel
+      </Link>
+
+      <PageHeader
+        eyebrow="Panel admin · Importar"
+        title={<>Importar<br /><span className="ital">temporada histórica.</span></>}
+        description="Subí un CSV exportado de Google Sheets para incorporar una temporada cerrada al histórico de la liga. No afecta a la temporada activa."
+      />
+
+      <div className="stitch" />
 
       <ErrorPanel error={error} />
 
-      <form onSubmit={handleSubmit} style={{ maxWidth: 480 }}>
+      <form onSubmit={handleSubmit} className="admin-form">
         <div className="form-group">
-          <label className="form-label">Nombre de la temporada *</label>
+          <label className="form-label" htmlFor="it-nombre">Nombre de la temporada *</label>
           <input
+            id="it-nombre"
             className="form-input"
             type="text"
             value={nombre}
@@ -256,24 +242,23 @@ export default function ImportarTemporada() {
           />
         </div>
 
-        <div className="form-group">
-          <label className="form-label">Fecha de inicio *</label>
+        <div className="form-group field-narrow">
+          <label className="form-label" htmlFor="it-fecha">Fecha de inicio *</label>
           <input
+            id="it-fecha"
             className="form-input"
             type="date"
             value={fechaInicio}
             onChange={(e) => setFechaInicio(e.target.value)}
             required
             disabled={submitting}
-            style={{ maxWidth: 220 }}
           />
         </div>
 
         <div className="form-group">
-          <label className="form-label">
-            Campeón (opcional)
-          </label>
+          <label className="form-label" htmlFor="it-campeon">Campeón (opcional)</label>
           <input
+            id="it-campeon"
             className="form-input"
             type="text"
             value={campeonNombre}
@@ -281,39 +266,37 @@ export default function ImportarTemporada() {
             placeholder="Nombre exacto del campeón (debe estar en el CSV)"
             disabled={submitting}
           />
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+          <span className="form-help">
             Solo completar cuando el campeón no coincide con el jugador de mayor puntaje.
           </span>
         </div>
 
         <div className="form-group">
-          <label className="form-label">Archivo CSV *</label>
+          <label className="form-label" htmlFor="it-archivo">Archivo CSV *</label>
           <input
+            id="it-archivo"
             type="file"
             accept=".csv,text/csv"
+            className="form-file"
             onChange={(e) => setArchivo(e.target.files[0] ?? null)}
             disabled={submitting}
             required
           />
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginTop: '0.25rem' }}>
+          <span className="form-help">
             Exportá desde Google Sheets: Archivo → Descargar → Valores separados por comas (.csv).
             Separador <code>;</code> preferido, <code>,</code> también aceptado.
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginTop: '1rem' }}>
-          <button
-            className="btn btn-primary"
-            type="submit"
-            disabled={submitting}
-          >
-            {submitting ? 'Importando...' : 'Importar temporada'}
+        <div className="form-actions">
+          <button className="btn btn-primary" type="submit" disabled={submitting}>
+            {submitting ? 'Importando…' : 'Importar temporada'}
           </button>
           <Link to="/admin" className="btn btn-secondary">
             Cancelar
           </Link>
         </div>
       </form>
-    </>
+    </section>
   )
 }

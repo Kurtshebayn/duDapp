@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
 import {
   getTemporadaActiva,
@@ -8,6 +8,8 @@ import {
   editarReunion,
 } from '../../services/api'
 import PosicionadorReunion from '../../components/PosicionadorReunion'
+import PageHeader from '../../components/PageHeader'
+import { parseLocalDate, formatDayMonth } from '../../lib/dates'
 
 function hoy() {
   return new Date().toISOString().slice(0, 10)
@@ -19,6 +21,7 @@ export default function GestionReunion({ modo }) {
   const { id: reunionId } = useParams()
 
   const [temporada, setTemporada] = useState(null)
+  const [reunionMeta, setReunionMeta] = useState(null) // numero_jornada al editar
   const [fecha, setFecha] = useState(hoy())
   const [posiciones, setPosiciones] = useState([])
   const [posicionesIniciales, setPosicionesIniciales] = useState([])
@@ -37,6 +40,7 @@ export default function GestionReunion({ modo }) {
           const reunion = await getResultadosReunion(reunionId)
           if (!reunion) { navigate('/admin'); return }
           setFecha(reunion.fecha ?? hoy())
+          setReunionMeta({ numero_jornada: reunion.numero_jornada })
           const iniciales = reunion.posiciones.map((p) => ({
             posicion: p.posicion,
             id_jugador: p.id_jugador,
@@ -75,17 +79,50 @@ export default function GestionReunion({ modo }) {
     }
   }
 
-  if (loading) return <p className="status">Cargando...</p>
+  if (loading) return <p className="status">Cargando…</p>
   if (!temporada) return null
 
+  const isEdit = modo === 'editar'
+  const fechaParsed = parseLocalDate(fecha)
+  const fechaLabel = fechaParsed ? formatDayMonth(fechaParsed) : null
+
   return (
-    <>
-      <h1>{modo === 'crear' ? 'Registrar reunión' : 'Editar reunión'}</h1>
+    <section className="editorial-page admin-form-page">
+      <Link to="/admin" className="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+        Volver al panel
+      </Link>
+
+      <PageHeader
+        eyebrow={
+          isEdit && reunionMeta
+            ? `Editar · Jornada ${reunionMeta.numero_jornada}`
+            : `Panel admin · ${temporada.nombre}`
+        }
+        title={
+          isEdit
+            ? <>Editar la<br /><span className="ital">jornada.</span></>
+            : <>Nueva<br /><span className="ital">jornada.</span></>
+        }
+        description={
+          isEdit
+            ? 'Reordená posiciones, cambiá fecha o sumá invitados. Los puntos se recalculan automáticamente al guardar.'
+            : 'Asigná posiciones arrastrando jugadores. Los puntos se calculan según el puesto: 15 al primero, 14 al segundo, así hacia abajo.'
+        }
+      />
+
+      <div className="stitch" />
+
       {error && <div className="alert alert-error">{error}</div>}
 
-      <div className="form-group" style={{ maxWidth: 220 }}>
-        <label className="form-label">Fecha</label>
+      <div className="form-group field-narrow">
+        <label className="form-label" htmlFor="gr-fecha">
+          Fecha {fechaLabel && <span className="form-label-hint">· {fechaLabel}</span>}
+        </label>
         <input
+          id="gr-fecha"
           className="form-input"
           type="date"
           value={fecha}
@@ -100,18 +137,18 @@ export default function GestionReunion({ modo }) {
         onChange={setPosiciones}
       />
 
-      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+      <div className="form-actions">
         <button
           className="btn btn-primary"
           onClick={handleGuardar}
           disabled={saving}
         >
-          {saving ? 'Guardando...' : modo === 'crear' ? 'Confirmar reunión' : 'Guardar cambios'}
+          {saving ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Confirmar reunión'}
         </button>
         <button className="btn btn-secondary" onClick={() => navigate('/admin')}>
           Cancelar
         </button>
       </div>
-    </>
+    </section>
   )
 }

@@ -11,59 +11,27 @@ import {
   inscribirJugadorEnActiva,
 } from '../../services/api'
 import PlayerAvatar from '../../components/PlayerAvatar'
-
-function formatFecha(iso) {
-  if (!iso) return 'Sin fecha'
-  const [y, m, d] = iso.split('-')
-  return `${d}/${m}/${y}`
-}
-
-const modalBackdropStyle = {
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(0,0,0,0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000,
-}
-
-const modalStyle = {
-  background: 'var(--bg, #fff)',
-  borderRadius: '8px',
-  padding: '1.5rem',
-  minWidth: '320px',
-  maxWidth: '90vw',
-  boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
-}
-
-const sectionHeaderStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  gap: '0.75rem',
-  marginTop: '1rem',
-}
+import PageHeader from '../../components/PageHeader'
+import { parseLocalDate, formatDayMonth } from '../../lib/dates'
 
 export default function Dashboard() {
   const { token } = useAuth()
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
 
-  const [temporada, setTemporada] = useState(undefined) // undefined = loading
+  const [temporada, setTemporada] = useState(undefined)
   const [reuniones, setReuniones] = useState([])
   const [jugadores, setJugadores] = useState([])
   const [cerrando, setCerrando] = useState(false)
   const [error, setError] = useState(null)
   const [uploadingId, setUploadingId] = useState(null)
+  const [linkCopied, setLinkCopied] = useState(false)
 
-  // Modal "Nuevo jugador"
   const [showNuevoJugador, setShowNuevoJugador] = useState(false)
   const [nuevoNombre, setNuevoNombre] = useState('')
   const [creandoJugador, setCreandoJugador] = useState(false)
   const [errorModal, setErrorModal] = useState(null)
 
-  // Botón "+ A temporada" en cada card
   const [agregandoId, setAgregandoId] = useState(null)
 
   const cargar = useCallback(async () => {
@@ -93,9 +61,14 @@ export default function Dashboard() {
     }
   }
 
-  function copiarLink() {
-    navigator.clipboard.writeText(`${window.location.origin}/ranking`)
-    alert('Link copiado al portapapeles.')
+  async function copiarLink() {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/ranking`)
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+    } catch {
+      // silencioso
+    }
   }
 
   function handleFotoClick(jugadorId) {
@@ -160,9 +133,7 @@ export default function Dashboard() {
     setError(null)
     try {
       const result = await inscribirJugadorEnActiva(token, jugadorId)
-      if (!result) {
-        throw new Error('No se pudo inscribir el jugador (404).')
-      }
+      if (!result) throw new Error('No se pudo inscribir el jugador (404).')
       await cargar()
     } catch (err) {
       setError(err.message)
@@ -171,30 +142,44 @@ export default function Dashboard() {
     }
   }
 
-  if (temporada === undefined) return <p className="status">Cargando...</p>
+  if (temporada === undefined) return <p className="status">Cargando…</p>
 
   const inscritosIds = new Set((temporada?.jugadores ?? []).map((j) => j.id))
+  const ordenadas = [...reuniones].sort(
+    (a, b) => (b.numero_jornada || 0) - (a.numero_jornada || 0)
+  )
 
   return (
-    <>
+    <section className="editorial-page admin-dashboard">
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        style={{ display: 'none' }}
+        className="hidden-file-input"
         onChange={handleFotoChange}
       />
 
-      {error && <div className="alert alert-error">{error}</div>}
+      <PageHeader
+        eyebrow="Panel admin"
+        title={<>Tu <span className="ital">mesa.</span></>}
+        description={
+          temporada
+            ? `${temporada.nombre} en curso. Registrá reuniones, gestioná jugadores, cerrá la temporada cuando llegue el momento.`
+            : 'Sin temporada activa. Empezá una nueva para comenzar a registrar jornadas.'
+        }
+      />
 
-      {/* ── Acciones administrativas (siempre visibles) ────────────── */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
+      <div className="dashboard-toolbar">
         <Link to="/admin/importar-temporada" className="btn btn-secondary btn-sm">
           Importar temporada histórica
         </Link>
       </div>
 
-      {/* ── Temporada ──────────────────────────────────────────────── */}
+      {error && <div className="alert alert-error">{error}</div>}
+
+      <div className="stitch" />
+
+      {/* ── Temporada activa o empty state ─────────────────────────── */}
       {!temporada ? (
         <div className="empty-state">
           <div className="empty-state-title">No hay temporada activa</div>
@@ -211,49 +196,52 @@ export default function Dashboard() {
             <div className="season-card-header">
               <div>
                 <div className="season-name">{temporada.nombre}</div>
-                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                <div className="season-meta">
                   {temporada.total_reuniones} reunión{temporada.total_reuniones !== 1 ? 'es' : ''} ·{' '}
                   {temporada.jugadores.length} jugadores
                 </div>
               </div>
               <div className="season-actions">
                 <button className="btn btn-secondary btn-sm" onClick={copiarLink}>
-                  Compartir link
+                  {linkCopied ? 'Link copiado' : 'Compartir link'}
                 </button>
                 <button
                   className="btn btn-danger btn-sm"
                   onClick={handleCerrar}
                   disabled={cerrando}
                 >
-                  {cerrando ? 'Cerrando...' : 'Cerrar temporada'}
+                  {cerrando ? 'Cerrando…' : 'Cerrar temporada'}
                 </button>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <div className="season-card-actions">
               <Link to="/admin/reuniones/nueva" className="btn btn-primary btn-sm">
                 + Registrar reunión
               </Link>
             </div>
           </div>
 
-          <h1>Reuniones</h1>
+          <div className="page-section-head">
+            <h2 className="page-section-title">Reuniones.</h2>
+            <span className="eyebrow">
+              <span className="dot" />
+              {reuniones.length} {reuniones.length === 1 ? 'jornada' : 'jornadas'}
+            </span>
+          </div>
 
           {reuniones.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
-              Aún no hay reuniones registradas.
-            </p>
+            <p className="status historico-empty">Aún no hay reuniones registradas.</p>
           ) : (
-            <div className="list" style={{ marginBottom: '2.5rem' }}>
-              {[...reuniones].reverse().map((r) => (
-                <div key={r.id} className="list-item" style={{ cursor: 'default' }}>
-                  <div className="list-item-left">
-                    <span className="jornada-badge">Jornada {r.numero_jornada}</span>
-                    <span className="list-item-date">{formatFecha(r.fecha)}</span>
+            <div className="board board-reuniones board-admin" role="table">
+              {ordenadas.map((r) => (
+                <div key={r.id} className="row" role="row">
+                  <div className="pos num">{String(r.numero_jornada).padStart(2, '0')}</div>
+                  <div className="row-fecha">
+                    {formatDayMonth(parseLocalDate(r.fecha)) || 'Sin fecha'}
                   </div>
                   <Link
                     to={`/admin/reuniones/${r.id}/editar`}
-                    className="btn btn-secondary btn-sm"
-                    onClick={(e) => e.stopPropagation()}
+                    className="btn btn-secondary btn-sm row-edit"
                   >
                     Editar
                   </Link>
@@ -264,9 +252,11 @@ export default function Dashboard() {
         </>
       )}
 
-      {/* ── Jugadores ──────────────────────────────────────────────── */}
-      <div style={sectionHeaderStyle}>
-        <h1 style={{ margin: 0 }}>Jugadores</h1>
+      <div className="stitch" />
+
+      {/* ── Catálogo de jugadores ──────────────────────────────────── */}
+      <div className="page-section-head">
+        <h2 className="page-section-title">Jugadores.</h2>
         <button
           type="button"
           className="btn btn-primary btn-sm"
@@ -277,9 +267,7 @@ export default function Dashboard() {
       </div>
 
       {jugadores.length === 0 ? (
-        <p style={{ color: 'var(--text-muted)', marginTop: '0.75rem' }}>
-          Aún no hay jugadores en el catálogo.
-        </p>
+        <p className="status historico-empty">Aún no hay jugadores en el catálogo.</p>
       ) : (
         <div className="jugadores-grid">
           {jugadores.map((j) => {
@@ -291,11 +279,10 @@ export default function Dashboard() {
                 {temporada && !yaInscrito && (
                   <button
                     type="button"
-                    className="btn btn-secondary btn-sm"
+                    className="btn btn-secondary btn-sm jugador-card-add"
                     title="Agregar a la temporada activa"
                     disabled={agregandoId === j.id}
                     onClick={() => handleAgregarATemporada(j.id)}
-                    style={{ fontSize: '0.78rem' }}
                   >
                     {agregandoId === j.id ? '…' : '+ Temporada'}
                   </button>
@@ -306,8 +293,16 @@ export default function Dashboard() {
                   title="Cambiar foto"
                   disabled={uploadingId === j.id}
                   onClick={() => handleFotoClick(j.id)}
+                  aria-label="Cambiar foto"
                 >
-                  {uploadingId === j.id ? '…' : '📷'}
+                  {uploadingId === j.id ? (
+                    <span>…</span>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+                      <circle cx="12" cy="13" r="3" />
+                    </svg>
+                  )}
                 </button>
               </div>
             )
@@ -317,32 +312,27 @@ export default function Dashboard() {
 
       {/* ── Modal Nuevo Jugador ────────────────────────────────────── */}
       {showNuevoJugador && (
-        <div style={modalBackdropStyle} onClick={cerrarModalNuevoJugador}>
-          <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ marginTop: 0 }}>Nuevo jugador</h2>
+        <div className="modal-backdrop" onClick={cerrarModalNuevoJugador}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <h3 className="modal-title">Nuevo jugador</h3>
             <form onSubmit={handleCrearJugador}>
-              <input
-                type="text"
-                placeholder="Nombre del jugador"
-                value={nuevoNombre}
-                onChange={(e) => setNuevoNombre(e.target.value)}
-                autoFocus
-                disabled={creandoJugador}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem 0.75rem',
-                  marginBottom: '0.75rem',
-                  border: '1px solid var(--border, #ccc)',
-                  borderRadius: '4px',
-                  fontSize: '1rem',
-                }}
-              />
+              <div className="form-group">
+                <label className="form-label" htmlFor="nuevo-jugador-nombre">Nombre</label>
+                <input
+                  id="nuevo-jugador-nombre"
+                  className="form-input"
+                  type="text"
+                  placeholder="ej: Bahamo"
+                  value={nuevoNombre}
+                  onChange={(e) => setNuevoNombre(e.target.value)}
+                  autoFocus
+                  disabled={creandoJugador}
+                />
+              </div>
               {errorModal && (
-                <div className="alert alert-error" style={{ marginBottom: '0.75rem' }}>
-                  {errorModal}
-                </div>
+                <div className="alert alert-error modal-alert">{errorModal}</div>
               )}
-              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+              <div className="modal-actions">
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
@@ -356,13 +346,13 @@ export default function Dashboard() {
                   className="btn btn-primary btn-sm"
                   disabled={creandoJugador || !nuevoNombre.trim()}
                 >
-                  {creandoJugador ? 'Creando...' : 'Crear'}
+                  {creandoJugador ? 'Creando…' : 'Crear'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </>
+    </section>
   )
 }
