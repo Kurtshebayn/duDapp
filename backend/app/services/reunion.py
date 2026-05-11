@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.posicion import Posicion
 from app.models.reunion import Reunion
 from app.models.temporada import EstadoTemporada, Temporada
+from app.services import snapshots as snapshots_service
 from app.services.puntos import calcular_puntos
 
 
@@ -27,6 +28,9 @@ def registrar_reunion(
     db.flush()
 
     _guardar_posiciones(db, reunion.id, posiciones_input)
+    db.flush()  # ensure Posicion rows are visible before snapshot generation
+
+    snapshots_service._generar_snapshots_para_reunion(db, temporada_id, reunion.id)
 
     db.commit()
     db.refresh(reunion)
@@ -48,6 +52,9 @@ def editar_reunion(
     db.query(Posicion).filter(Posicion.id_reunion == reunion_id).delete()
     reunion.fecha = fecha
     _guardar_posiciones(db, reunion_id, posiciones_input)
+    db.flush()  # ensure updated Posicion rows are visible before snapshot replay
+
+    snapshots_service._regenerar_snapshots_temporada(db, reunion.id_temporada)
 
     db.commit()
     db.refresh(reunion)
