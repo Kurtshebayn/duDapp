@@ -7,6 +7,29 @@ Tipos de entrada (dicts simples):
 """
 
 
+def assign_competition_ranks(ranking_entries: list[dict]) -> list[dict]:
+    """
+    Asigna `posicion` (competition rank, estilo olímpico: 1-1-3-4) a cada
+    entry del ranking.
+
+    Asume que ranking_entries YA viene ordenado por puntos desc — output
+    de calcular_ranking(). NO muta el input; devuelve nueva lista.
+    Bit-exact con frontend/src/lib/ranking.js:assignRanks().
+
+    Algoritmo:
+      - i == 0 o puntos distintos al anterior → posicion = i + 1
+      - Empate con anterior → misma posicion que el anterior
+    """
+    result: list[dict] = []
+    for i, entry in enumerate(ranking_entries):
+        if i > 0 and entry["puntos"] == ranking_entries[i - 1]["puntos"]:
+            posicion = result[i - 1]["posicion"]
+        else:
+            posicion = i + 1
+        result.append({**entry, "posicion": posicion})
+    return result
+
+
 def calcular_ranking(
     inscripciones: list[dict],
     posiciones: list[dict],

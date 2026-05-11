@@ -1,0 +1,117 @@
+[
+  {
+    "name": "empty list",
+    "input": [],
+    "expected": []
+  },
+  {
+    "name": "single entry",
+    "input": [
+      { "id_jugador": 1, "nombre": "Ana", "puntos": 15, "asistencias": 1 }
+    ],
+    "expected": [
+      { "id_jugador": 1, "posicion": 1 }
+    ]
+  },
+  {
+    "name": "no ties — three players",
+    "input": [
+      { "id_jugador": 1, "nombre": "Ana",    "puntos": 15, "asistencias": 1 },
+      { "id_jugador": 2, "nombre": "Bruno",  "puntos": 14, "asistencias": 1 },
+      { "id_jugador": 3, "nombre": "Carlos", "puntos": 13, "asistencias": 1 }
+    ],
+    "expected": [
+      { "id_jugador": 1, "posicion": 1 },
+      { "id_jugador": 2, "posicion": 2 },
+      { "id_jugador": 3, "posicion": 3 }
+    ]
+  },
+  {
+    "name": "2-way top tie",
+    "input": [
+      { "id_jugador": 1, "nombre": "Ana",    "puntos": 15, "asistencias": 2 },
+      { "id_jugador": 2, "nombre": "Bruno",  "puntos": 15, "asistencias": 2 },
+      { "id_jugador": 3, "nombre": "Carlos", "puntos": 13, "asistencias": 2 }
+    ],
+    "expected": [
+      { "id_jugador": 1, "posicion": 1 },
+      { "id_jugador": 2, "posicion": 1 },
+      { "id_jugador": 3, "posicion": 3 }
+    ]
+  },
+  {
+    "name": "3-way top tie",
+    "input": [
+      { "id_jugador": 1, "nombre": "Ana",    "puntos": 15, "asistencias": 3 },
+      { "id_jugador": 2, "nombre": "Bruno",  "puntos": 15, "asistencias": 3 },
+      { "id_jugador": 3, "nombre": "Carlos", "puntos": 15, "asistencias": 3 }
+    ],
+    "expected": [
+      { "id_jugador": 1, "posicion": 1 },
+      { "id_jugador": 2, "posicion": 1 },
+      { "id_jugador": 3, "posicion": 1 }
+    ]
+  },
+  {
+    "name": "middle tie (positions 2 and 2, no 3)",
+    "input": [
+      { "id_jugador": 1, "nombre": "Ana",    "puntos": 15, "asistencias": 3 },
+      { "id_jugador": 2, "nombre": "Bruno",  "puntos": 13, "asistencias": 3 },
+      { "id_jugador": 3, "nombre": "Carlos", "puntos": 13, "asistencias": 3 }
+    ],
+    "expected": [
+      { "id_jugador": 1, "posicion": 1 },
+      { "id_jugador": 2, "posicion": 2 },
+      { "id_jugador": 3, "posicion": 2 }
+    ]
+  },
+  {
+    "name": "4-player 3-way top tie",
+    "input": [
+      { "id_jugador": 1, "nombre": "Ana",    "puntos": 15, "asistencias": 4 },
+      { "id_jugador": 2, "nombre": "Bruno",  "puntos": 15, "asistencias": 4 },
+      { "id_jugador": 3, "nombre": "Carlos", "puntos": 15, "asistencias": 4 },
+      { "id_jugador": 4, "nombre": "Diana",  "puntos": 10, "asistencias": 4 }
+    ],
+    "expected": [
+      { "id_jugador": 1, "posicion": 1 },
+      { "id_jugador": 2, "posicion": 1 },
+      { "id_jugador": 3, "posicion": 1 },
+      { "id_jugador": 4, "posicion": 4 }
+    ]
+  },
+  {
+    "name": "all tied — 4 players",
+    "input": [
+      { "id_jugador": 1, "nombre": "Ana",    "puntos": 42, "asistencias": 3 },
+      { "id_jugador": 2, "nombre": "Bruno",  "puntos": 42, "asistencias": 3 },
+      { "id_jugador": 3, "nombre": "Carlos", "puntos": 42, "asistencias": 3 },
+      { "id_jugador": 4, "nombre": "Diana",  "puntos": 42, "asistencias": 3 }
+    ],
+    "expected": [
+      { "id_jugador": 1, "posicion": 1 },
+      { "id_jugador": 2, "posicion": 1 },
+      { "id_jugador": 3, "posicion": 1 },
+      { "id_jugador": 4, "posicion": 1 }
+    ]
+  },
+  {
+    "name": "6-player real-shape season slice",
+    "input": [
+      { "id_jugador": 1, "nombre": "Ana",    "puntos": 100, "asistencias": 7 },
+      { "id_jugador": 2, "nombre": "Bruno",  "puntos": 100, "asistencias": 7 },
+      { "id_jugador": 3, "nombre": "Carlos", "puntos": 80,  "asistencias": 6 },
+      { "id_jugador": 4, "nombre": "Diana",  "puntos": 70,  "asistencias": 5 },
+      { "id_jugador": 5, "nombre": "Ernesto","puntos": 70,  "asistencias": 5 },
+      { "id_jugador": 6, "nombre": "Flor",   "puntos": 55,  "asistencias": 4 }
+    ],
+    "expected": [
+      { "id_jugador": 1, "posicion": 1 },
+      { "id_jugador": 2, "posicion": 1 },
+      { "id_jugador": 3, "posicion": 3 },
+      { "id_jugador": 4, "posicion": 4 },
+      { "id_jugador": 5, "posicion": 4 },
+      { "id_jugador": 6, "posicion": 6 }
+    ]
+  }
+]
