@@ -1,8 +1,16 @@
 import { useRef, useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
 import { getJugadores, crearTemporada, subirFotoJugador } from '../../services/api'
 import PlayerAvatar from '../../components/PlayerAvatar'
+import PageHeader from '../../components/PageHeader'
+
+const CAMERA_ICON = (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+    <circle cx="12" cy="13" r="3" />
+  </svg>
+)
 
 export default function CrearTemporada() {
   const { token } = useAuth()
@@ -13,7 +21,7 @@ export default function CrearTemporada() {
   const [fechaInicio, setFechaInicio] = useState(() => new Date().toISOString().slice(0, 10))
   const [jugadoresExistentes, setJugadoresExistentes] = useState([])
   const [seleccionados, setSeleccionados] = useState(new Set())
-  const [nuevosNombres, setNuevosNombres] = useState([]) // nombres de jugadores nuevos
+  const [nuevosNombres, setNuevosNombres] = useState([])
   const [nuevoInput, setNuevoInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -39,7 +47,7 @@ export default function CrearTemporada() {
         prev.map((j) => (j.id === jugadorId ? { ...j, foto_url: updated.foto_url } : j))
       )
     } catch {
-      // silencioso — el avatar simplemente no cambia
+      // silencioso
     } finally {
       setUploadingId(null)
     }
@@ -89,25 +97,50 @@ export default function CrearTemporada() {
   const totalJugadores = seleccionados.size + nuevosNombres.length
 
   return (
-    <>
-      <h1>Nueva temporada</h1>
+    <section className="editorial-page admin-form-page">
+      <Link to="/admin" className="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+        Volver al panel
+      </Link>
+
+      <PageHeader
+        eyebrow="Panel admin · Nueva temporada"
+        title={<>Empezá una<br /><span className="ital">temporada.</span></>}
+        description="Definí el nombre, la fecha de inicio y la lista de jugadores que van a competir. Podés sumar jugadores nuevos o reusar los del catálogo."
+      />
+
+      <div className="stitch" />
+
       {error && <div className="alert alert-error">{error}</div>}
-      <form onSubmit={handleSubmit}>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden-file-input"
+        onChange={handleFotoChange}
+      />
+
+      <form onSubmit={handleSubmit} className="admin-form">
         <div className="form-group">
-          <label className="form-label">Nombre de la temporada</label>
+          <label className="form-label" htmlFor="ct-nombre">Nombre de la temporada</label>
           <input
+            id="ct-nombre"
             className="form-input"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ej: Liga 2025"
+            placeholder="Ej: Liga 2026"
             required
             autoFocus
           />
         </div>
 
-        <div className="form-group" style={{ maxWidth: 220 }}>
-          <label className="form-label">Fecha de inicio</label>
+        <div className="form-group field-narrow">
+          <label className="form-label" htmlFor="ct-fecha">Fecha de inicio</label>
           <input
+            id="ct-fecha"
             className="form-input"
             type="date"
             value={fechaInicio}
@@ -116,17 +149,15 @@ export default function CrearTemporada() {
           />
         </div>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={handleFotoChange}
-        />
-
         {jugadoresExistentes.length > 0 && (
           <div className="form-group">
-            <label className="form-label">Jugadores existentes</label>
+            <div className="page-section-head">
+              <h2 className="page-section-title">Jugadores del catálogo.</h2>
+              <span className="eyebrow">
+                <span className="dot" />
+                {seleccionados.size} de {jugadoresExistentes.length} seleccionados
+              </span>
+            </div>
             <div className="checkbox-grid">
               {jugadoresExistentes.map((j) => (
                 <div key={j.id} className="checkbox-item-wrap">
@@ -142,10 +173,11 @@ export default function CrearTemporada() {
                     type="button"
                     className="btn-foto"
                     title="Cambiar foto"
+                    aria-label="Cambiar foto"
                     disabled={uploadingId === j.id}
                     onClick={() => handleFotoClick(j.id)}
                   >
-                    {uploadingId === j.id ? '…' : '📷'}
+                    {uploadingId === j.id ? <span>…</span> : CAMERA_ICON}
                   </button>
                 </div>
               ))}
@@ -154,8 +186,16 @@ export default function CrearTemporada() {
         )}
 
         <div className="form-group">
-          <label className="form-label">Jugadores nuevos</label>
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+          <div className="page-section-head">
+            <h2 className="page-section-title">Jugadores nuevos.</h2>
+            {nuevosNombres.length > 0 && (
+              <span className="eyebrow">
+                <span className="dot" />
+                {nuevosNombres.length} para crear
+              </span>
+            )}
+          </div>
+          <div className="form-inline">
             <input
               className="form-input"
               value={nuevoInput}
@@ -168,15 +208,15 @@ export default function CrearTemporada() {
             </button>
           </div>
           {nuevosNombres.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div className="chip-list">
               {nuevosNombres.map((n) => (
                 <span key={n} className="chip chip-player">
                   {n}
                   <button
                     type="button"
                     className="btn-remove"
-                    style={{ marginLeft: '0.4rem' }}
                     onClick={() => quitarNuevo(n)}
+                    aria-label={`Quitar ${n}`}
                   >×</button>
                 </span>
               ))}
@@ -184,15 +224,15 @@ export default function CrearTemporada() {
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        <div className="form-actions">
           <button className="btn btn-primary" type="submit" disabled={loading || totalJugadores === 0}>
-            {loading ? 'Creando...' : `Crear temporada (${totalJugadores} jugadores)`}
+            {loading ? 'Creando…' : `Crear temporada (${totalJugadores} jugadores)`}
           </button>
           <button type="button" className="btn btn-secondary" onClick={() => navigate('/admin')}>
             Cancelar
           </button>
         </div>
       </form>
-    </>
+    </section>
   )
 }

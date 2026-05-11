@@ -19,8 +19,9 @@ var/
 sdist/
 develop-eggs/
 .installed.cfg
-lib/
-lib64/
+# Anclados al root para no chocar con frontend/src/lib/ (helpers JS)
+/lib/
+/lib64/
 *.so
 
 # Virtualenvs
