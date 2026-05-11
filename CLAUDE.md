@@ -78,13 +78,19 @@ Variables esperadas:
 - JWT_SECRET — clave para firmar tokens
 - CORS_ORIGINS — dominios permitidos del frontend
 
-## Fase actual: Fase 6 — Pulido y lanzamiento
+## Fase actual: Fase 7 — Post-launch
 
-Objetivo: preparar para uso real.
-- Probar drag & drop en dispositivos móviles reales (R-04)
-- Implementar indicador de carga para cold starts (R-01)
-- Documentar proceso de reseteo de contraseña (R-05)
-- Desplegar backend en Render y frontend en Vercel
+App ya en producción (Render + Vercel + Neon). Backlog priorizado (orden recomendado):
+
+1. **Cleanup dead code `/estadisticas`** — refactor chico, sin riesgo.
+2. **Position snapshots backend** — habilita narrativas tipo "sube 1", "racha de 3", "líder desde J-09".
+3. **Avatar de ganador en lista pública de Reuniones** — depende del endpoint enriquecido por (2).
+4. **UI de desempate al cierre de temporada** — requiere `id_campeon` en `Temporada` + admin flow post-cierre (topic engram: `dudapp/backlog/season-tiebreaker-admin-flow`).
+5. **Test suite frontend** — Vitest + React Testing Library; el más costoso y menos urgente.
+
+Notas:
+- R-05 (documentar reset de contraseña) está **fuera de scope** por decisión explícita del usuario. No proponerlo en backlogs futuros aunque siga apareciendo en docs antiguas.
+- R-04 (drag & drop mobile) fue validado manualmente y queda cerrado.
 
 ## Fases completadas
 
@@ -102,5 +108,14 @@ Aplicación React inicializada con Vite y React Router. Vistas públicas impleme
 
 ### Fase 5 — Frontend admin
 Vistas protegidas del administrador implementadas. Login con JWT en localStorage, dashboard con estado de temporada activa, crear temporada con selección de jugadores, registrar y editar reunión con drag & drop (HTML5 DnD), cerrar temporada, compartir link (CU-08). Endpoints adicionales: GET /jugadores, GET /temporadas/activa.
+
+### Fase 6 — Pulido y lanzamiento
+App desplegada a producción (Render + Vercel + Neon, 2026-05-11). Drag & drop validado en mobile real (R-04 ✅). Indicador de carga para cold starts implementado (R-01 ✅). Rediseño visual completo: sistema editorial cream/leather aplicado a las 9 páginas + nav, en 3 sprints (A públicas, B nav/auth, C forms admin). R-05 (reset de contraseña) declarado fuera de scope por el usuario.
+
+### Cambios SDD posteriores al roadmap original
+- **inscripciones-mitad-temporada** — admin puede crear jugadores e inscribirlos a la temporada activa después de iniciada (regla de negocio actualizada).
+- **bulk-import-temporadas** — endpoint admin de importación CSV para 5 temporadas históricas previas al sistema.
+- **historico-aggregations** — vista pública de estadísticas cross-temporadas (PR #4, shipped 2026-05-05).
+- **sync-docs-to-post-neon-state** — docs y ADRs sincronizados con la migración Render→Neon (2026-05-03).
 
 Ver /docs/roadmap.md para detalle completo.

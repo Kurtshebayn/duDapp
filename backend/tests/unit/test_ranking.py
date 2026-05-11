@@ -1,4 +1,4 @@
-from app.services.ranking import calcular_ranking, calcular_estadisticas
+from app.services.ranking import calcular_ranking
 
 
 # Estructura de datos para estas funciones:
@@ -73,19 +73,3 @@ def test_ranking_acumula_puntos_de_varias_reuniones():
 
     assert ranking[0]["puntos"] == 29
     assert ranking[0]["asistencias"] == 2
-
-
-def test_estadisticas_asistencias_y_promedio():
-    inscritos = [{"id_jugador": 1, "nombre": "Ana"}]
-    posiciones = [
-        {"id_jugador": 1, "es_invitado": False, "puntos": 15},
-        {"id_jugador": 1, "es_invitado": False, "puntos": 13},
-    ]
-    total_reuniones = 3
-
-    stats = calcular_estadisticas(inscritos, posiciones, total_reuniones)
-
-    jugador = stats[0]
-    assert jugador["asistencias"] == 2
-    assert jugador["promedio"] == 14.0
-    assert jugador["inasistencias"] == 1

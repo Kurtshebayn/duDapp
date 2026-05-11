@@ -6,7 +6,6 @@ import DiceLoader from './components/DiceLoader'
 import Ranking from './pages/Ranking'
 import Reuniones from './pages/Reuniones'
 import ReunionDetalle from './pages/ReunionDetalle'
-import Estadisticas from './pages/Estadisticas'
 import Login from './pages/Login'
 import Dashboard from './pages/admin/Dashboard'
 import CrearTemporada from './pages/admin/CrearTemporada'
@@ -26,7 +25,6 @@ export default function App() {
             <Route path="/ranking" element={<Ranking />} />
             <Route path="/reuniones" element={<Reuniones />} />
             <Route path="/reuniones/:id" element={<ReunionDetalle />} />
-            <Route path="/estadisticas" element={<Estadisticas />} />
             <Route path="/historico" element={<Historico />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

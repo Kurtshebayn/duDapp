@@ -44,20 +44,3 @@ class ReunionResumenResponse(BaseModel):
     fecha: date | None
 
     model_config = {"from_attributes": True}
-
-
-class EstadisticasEntryResponse(BaseModel):
-    id_jugador: int
-    nombre: str
-    puntos: int
-    asistencias: int
-    promedio: float
-    inasistencias: int
-    foto_url: str | None = None
-
-
-class EstadisticasResponse(BaseModel):
-    ranking: list[EstadisticasEntryResponse]
-    top3: list[EstadisticasEntryResponse]
-    mejor_promedio: EstadisticasEntryResponse | None
-    mas_inasistencias: EstadisticasEntryResponse | None

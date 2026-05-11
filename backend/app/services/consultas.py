@@ -6,7 +6,7 @@ from app.models.jugador import Jugador
 from app.models.posicion import Posicion
 from app.models.reunion import Reunion
 from app.models.temporada import EstadoTemporada, Temporada
-from app.services.ranking import calcular_estadisticas, calcular_ranking
+from app.services.ranking import calcular_ranking
 
 
 def _get_temporada_activa(db: Session) -> Temporada:
@@ -115,26 +115,4 @@ def get_resultados_reunion(db: Session, reunion_id: int) -> dict:
         "numero_jornada": reunion.numero_jornada,
         "fecha": reunion.fecha,
         "posiciones": posiciones,
-    }
-
-
-def get_estadisticas(db: Session) -> dict:
-    temporada = _get_temporada_activa(db)
-    inscripciones = _get_inscripciones(db, temporada.id)
-    posiciones = _get_todas_posiciones(db, temporada.id)
-    total_reuniones = db.query(Reunion).filter(Reunion.id_temporada == temporada.id).count()
-
-    ranking = calcular_estadisticas(inscripciones, posiciones, total_reuniones)
-    foto_map = {i["id_jugador"]: i["foto_url"] for i in inscripciones}
-    for entry in ranking:
-        entry["foto_url"] = foto_map.get(entry["id_jugador"])
-
-    mejor_promedio = max(ranking, key=lambda x: x["promedio"]) if ranking else None
-    mas_inasistencias = max(ranking, key=lambda x: x["inasistencias"]) if ranking else None
-
-    return {
-        "ranking": ranking,
-        "top3": ranking[:3],
-        "mejor_promedio": mejor_promedio,
-        "mas_inasistencias": mas_inasistencias,
     }
