@@ -193,55 +193,6 @@ def test_resultados_reunion_not_found(client):
     assert r.status_code == 404
 
 
-# ── CU-06: Estadísticas ───────────────────────────────────────────────────────
-
-
-def test_estadisticas_estructura_completa(client, escenario):
-    r = client.get("/temporadas/activa/estadisticas")
-    assert r.status_code == 200
-    data = r.json()
-    assert "ranking" in data
-    assert "top3" in data
-    assert "mejor_promedio" in data
-    assert "mas_inasistencias" in data
-
-
-def test_estadisticas_ranking_incluye_promedio_e_inasistencias(client, escenario):
-    r = client.get("/temporadas/activa/estadisticas")
-    entry = r.json()["ranking"][0]  # Ana
-    assert "promedio" in entry
-    assert "inasistencias" in entry
-    assert entry["promedio"] == round(29 / 2, 2)
-    assert entry["inasistencias"] == 0
-
-
-def test_estadisticas_top3(client, escenario):
-    r = client.get("/temporadas/activa/estadisticas")
-    data = r.json()
-    assert len(data["top3"]) == 3
-    assert data["top3"][0]["nombre"] == "Ana"
-
-
-def test_estadisticas_mejor_promedio(client, escenario):
-    r = client.get("/temporadas/activa/estadisticas")
-    data = r.json()
-    # Ana: 29/2=14.5, Carlos: 15/1=15.0, Bruno: 14/1=14.0
-    assert data["mejor_promedio"]["nombre"] == "Carlos"
-    assert data["mejor_promedio"]["promedio"] == 15.0
-
-
-def test_estadisticas_mas_inasistencias(client, escenario):
-    r = client.get("/temporadas/activa/estadisticas")
-    data = r.json()
-    # 2 reuniones: Bruno faltó 1, Carlos faltó 1, Ana faltó 0
-    assert data["mas_inasistencias"]["inasistencias"] == 1
-
-
-def test_estadisticas_sin_temporada_activa_retorna_404(client):
-    r = client.get("/temporadas/activa/estadisticas")
-    assert r.status_code == 404
-
-
 # ── REQ-IMP-29: nullable fecha serialization ──────────────────────────────────
 
 

@@ -36,7 +36,6 @@ function authHeaders(token) {
 
 export const getRanking = () => apiFetch('/temporadas/activa/ranking')
 export const getReuniones = () => apiFetch('/temporadas/activa/reuniones')
-export const getEstadisticas = () => apiFetch('/temporadas/activa/estadisticas')
 export const getResultadosReunion = (id) => apiFetch(`/reuniones/${id}`)
 export const getTemporadaActiva = () => apiFetch('/temporadas/activa')
 export const getJugadores = () => apiFetch('/jugadores')

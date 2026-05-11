@@ -442,40 +442,6 @@ tbody td {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   Top 3 (legado — el nuevo podio vive en componentes refactoreados)
-   ════════════════════════════════════════════════════════════════════════ */
-.top3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.top3-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem 1rem;
-  text-align: center;
-}
-
-.top3-pos {
-  font-size: 1.5rem;
-  margin-bottom: 0.4rem;
-}
-
-.top3-nombre {
-  font-weight: 700;
-  font-size: 0.95rem;
-  margin-bottom: 0.3rem;
-}
-
-.top3-puntos {
-  font-size: 0.82rem;
-  color: var(--muted);
-}
-
-/* ════════════════════════════════════════════════════════════════════════
    Lista de reuniones
    ════════════════════════════════════════════════════════════════════════ */
 .list {
@@ -558,38 +524,6 @@ tbody td {
   letter-spacing: 0.02em;
 }
 
-/* ════════════════════════════════════════════════════════════════════════
-   Estadísticas (highlight cards) — uso legado
-   ════════════════════════════════════════════════════════════════════════ */
-.highlight-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.highlight-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem 1.25rem;
-}
-
-.highlight-card .card-label {
-  margin-bottom: 0.5rem;
-}
-
-.highlight-card .name {
-  font-weight: 700;
-  font-size: 1rem;
-}
-
-.highlight-card .stat {
-  font-size: 0.82rem;
-  color: var(--muted);
-  margin-top: 0.2rem;
-}
-
 .section-title {
   font-size: 0.85rem;
   font-weight: 600;
@@ -597,11 +531,6 @@ tbody td {
   letter-spacing: 0.05em;
   color: var(--muted-2);
   margin-bottom: 1rem;
-}
-
-@media (max-width: 500px) {
-  .top3 { grid-template-columns: 1fr; }
-  .highlight-cards { grid-template-columns: 1fr; }
 }
 
 /* ════════════════════════════════════════════════════════════════════════

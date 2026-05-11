@@ -1,5 +1,5 @@
 """
-Funciones puras de ranking y estadísticas — sin dependencias de DB ni HTTP.
+Funciones puras de ranking — sin dependencias de DB ni HTTP.
 
 Tipos de entrada (dicts simples):
   inscripcion: {"id_jugador": int, "nombre": str}
@@ -35,19 +35,3 @@ def calcular_ranking(
     ]
     resultado.sort(key=lambda x: x["puntos"], reverse=True)
     return resultado
-
-
-def calcular_estadisticas(
-    inscripciones: list[dict],
-    posiciones: list[dict],
-    total_reuniones: int,
-) -> list[dict]:
-    """
-    Igual que calcular_ranking pero agrega promedio e inasistencias.
-    """
-    ranking = calcular_ranking(inscripciones, posiciones)
-    for entry in ranking:
-        asistencias = entry["asistencias"]
-        entry["promedio"] = round(entry["puntos"] / asistencias, 2) if asistencias else 0.0
-        entry["inasistencias"] = total_reuniones - asistencias
-    return ranking

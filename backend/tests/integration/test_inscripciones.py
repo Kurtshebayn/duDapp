@@ -1,6 +1,6 @@
 """
 Tests de integración para POST /temporadas/activa/inscripciones (Phase 3.1)
-+ regresión de estadísticas con jugador tardío (Phase 3.2).
++ regresión de ranking con jugador tardío (Phase 3.2).
 """
 import pytest
 
@@ -168,7 +168,7 @@ def test_inscribir_temporada_cerrada_responde_404(client, escenario_simple):
     assert r.status_code == 404
 
 
-# ── 3.2: regresión de estadísticas con jugador tardío ────────────────────────
+# ── 3.2: regresión de ranking con jugador tardío ─────────────────────────────
 
 
 def test_tardio_aparece_en_ranking_solo_con_sus_puntos_reales(client, escenario_simple):
@@ -252,7 +252,9 @@ def test_tardio_sin_asistencias_no_aparece_en_ranking(client, escenario_simple):
 def test_tardio_promedio_usa_solo_asistencias_reales(client, escenario_simple):
     """
     5 reuniones previas (sin Diego), inscribir Diego, 2 reuniones más donde Diego sale 1°.
-    Diego promedio = 30/2 = 15.0 (NO 30/7).
+    Diego puntos=30 / asistencias=2 → promedio derivado 15.0 (NO 30/7).
+    Validado contra /ranking: el endpoint expone puntos y asistencias reales;
+    el promedio se deriva client-side.
     """
     headers = escenario_simple["headers"]
     temporada_id = escenario_simple["temporada_id"]
@@ -278,20 +280,21 @@ def test_tardio_promedio_usa_solo_asistencias_reales(client, escenario_simple):
     _registrar_reunion(client, headers, temporada_id, "2024-02-14", [id_diego, id_ana])
     _registrar_reunion(client, headers, temporada_id, "2024-02-21", [id_diego, id_bruno])
 
-    r = client.get("/temporadas/activa/estadisticas")
+    r = client.get("/temporadas/activa/ranking")
     assert r.status_code == 200
-    ranking = {entry["nombre"]: entry for entry in r.json()["ranking"]}
+    diego = next(entry for entry in r.json() if entry["nombre"] == "Diego")
 
-    # Diego: 15 + 15 = 30 pts en 2 asistencias → promedio 15.0
-    assert ranking["Diego"]["puntos"] == 30
-    assert ranking["Diego"]["asistencias"] == 2
-    assert ranking["Diego"]["promedio"] == 15.0
+    # Diego: 15 + 15 = 30 pts en 2 asistencias → promedio derivado 15.0
+    assert diego["puntos"] == 30
+    assert diego["asistencias"] == 2
+    assert diego["puntos"] / diego["asistencias"] == 15.0
 
 
-def test_inasistencias_tardio_incluyen_reuniones_previas(client, escenario_simple):
+def test_tardio_no_se_suma_a_reuniones_previas(client, escenario_simple):
     """
     5 reuniones previas, inscribir Diego, 2 reuniones donde juega.
-    Diego inasistencias = 7 - 2 = 5 (incluye las reuniones previas a su inscripción).
+    Diego asistencias=2 (NO 7); las reuniones previas NO se le suman.
+    Ana asistencias=6 (5 previas + 1 nueva donde se enfrenta a Diego).
     """
     headers = escenario_simple["headers"]
     temporada_id = escenario_simple["temporada_id"]
@@ -314,12 +317,10 @@ def test_inasistencias_tardio_incluyen_reuniones_previas(client, escenario_simpl
     _registrar_reunion(client, headers, temporada_id, "2024-02-14", [id_diego, id_ana])
     _registrar_reunion(client, headers, temporada_id, "2024-02-21", [id_diego, id_bruno])
 
-    r = client.get("/temporadas/activa/estadisticas")
-    ranking = {entry["nombre"]: entry for entry in r.json()["ranking"]}
+    r = client.get("/temporadas/activa/ranking")
+    ranking = {entry["nombre"]: entry for entry in r.json()}
 
-    # 7 reuniones totales, Diego asistió a 2 → 5 inasistencias
+    # Diego: solo cuenta sus 2 asistencias reales (las previas NO se le suman)
     assert ranking["Diego"]["asistencias"] == 2
-    assert ranking["Diego"]["inasistencias"] == 5
-
-    # Ana asistió a 5 + 1 = 6 → 1 inasistencia
-    assert ranking["Ana"]["inasistencias"] == 1
+    # Ana: 5 previas + 1 nueva = 6
+    assert ranking["Ana"]["asistencias"] == 6

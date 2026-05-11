@@ -8,7 +8,6 @@ from app.auth.dependencies import get_current_user
 from app.database import get_db
 from app.models.usuario import Usuario
 from app.schemas.consultas import (
-    EstadisticasResponse,
     RankingEntryResponse,
     ReunionResumenResponse,
     TemporadaActivaDetalleResponse,
@@ -130,8 +129,3 @@ def ranking_temporada_activa(db: Session = Depends(get_db)):
 @router.get("/activa/reuniones", response_model=list[ReunionResumenResponse])
 def listar_reuniones_temporada_activa(db: Session = Depends(get_db)):
     return consultas_service.get_reuniones_activa(db)
-
-
-@router.get("/activa/estadisticas", response_model=EstadisticasResponse)
-def estadisticas_temporada_activa(db: Session = Depends(get_db)):
-    return consultas_service.get_estadisticas(db)
