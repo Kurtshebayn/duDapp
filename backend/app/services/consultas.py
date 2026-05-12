@@ -16,7 +16,7 @@ def _get_temporada_activa(db: Session) -> Temporada:
     return temporada
 
 
-def _get_inscripciones(db: Session, temporada_id: int) -> list[dict]:
+def get_inscripciones(db: Session, temporada_id: int) -> list[dict]:
     rows = (
         db.query(Jugador)
         .join(Inscripcion, Inscripcion.id_jugador == Jugador.id)
@@ -26,7 +26,7 @@ def _get_inscripciones(db: Session, temporada_id: int) -> list[dict]:
     return [{"id_jugador": j.id, "nombre": j.nombre, "foto_url": j.foto_url} for j in rows]
 
 
-def _get_todas_posiciones(db: Session, temporada_id: int) -> list[dict]:
+def get_todas_posiciones(db: Session, temporada_id: int) -> list[dict]:
     reunion_ids = [
         r.id
         for r in db.query(Reunion.id).filter(Reunion.id_temporada == temporada_id).all()
@@ -62,8 +62,8 @@ def get_temporada_activa_detalle(db: Session) -> dict:
 
 def get_ranking(db: Session) -> list[dict]:
     temporada = _get_temporada_activa(db)
-    inscripciones = _get_inscripciones(db, temporada.id)
-    posiciones = _get_todas_posiciones(db, temporada.id)
+    inscripciones = get_inscripciones(db, temporada.id)
+    posiciones = get_todas_posiciones(db, temporada.id)
     ranking = calcular_ranking(inscripciones, posiciones)
     foto_map = {i["id_jugador"]: i["foto_url"] for i in inscripciones}
     for entry in ranking:
