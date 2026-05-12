@@ -83,7 +83,8 @@ Variables esperadas:
 App ya en producción (Render + Vercel + Neon). Backlog priorizado (orden recomendado):
 
 1. **UI de desempate al cierre de temporada** — requiere `id_campeon` en `Temporada` + admin flow post-cierre (topic engram: `dudapp/backlog/season-tiebreaker-admin-flow`).
-2. **Test suite frontend** — Vitest + React Testing Library; el más costoso y menos urgente.
+2. **frontend-narrativas-y-ganador** — consumir `/temporadas/activa/ranking-narrativo` en `Ranking.jsx` (microcopy "sube N", "racha de N", "líder desde J-N") y renderizar avatar del `ganador` en `Reuniones.jsx`. Backend ya shippeado, frontend pendiente (topic engram: `dudapp/backlog/frontend-narrativas-y-ganador`).
+3. **Test suite frontend** — Vitest + React Testing Library; el más costoso y menos urgente.
 
 Notas:
 - R-05 (documentar reset de contraseña) está **fuera de scope** por decisión explícita del usuario. No proponerlo en backlogs futuros aunque siga apareciendo en docs antiguas.
