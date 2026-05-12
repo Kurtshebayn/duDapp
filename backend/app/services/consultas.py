@@ -71,14 +71,76 @@ def get_ranking(db: Session) -> list[dict]:
     return ranking
 
 
-def get_reuniones_activa(db: Session) -> list[Reunion]:
+def get_reuniones_activa(db: Session) -> list[dict]:
+    """
+    Return reuniones of the active temporada ordered by numero_jornada,
+    each enriched with a `ganador` field.
+
+    ganador rules (spec S-WA-*):
+    - If posicion=1 is held by an inscrito (es_invitado=False), ganador contains
+      that jugador's data.
+    - If posicion=1 is held by an invitado OR no posicion rows exist, ganador=None.
+    """
     temporada = _get_temporada_activa(db)
-    return (
+
+    reuniones = (
         db.query(Reunion)
         .filter(Reunion.id_temporada == temporada.id)
         .order_by(Reunion.numero_jornada)
         .all()
     )
+    if not reuniones:
+        return []
+
+    reunion_ids = [r.id for r in reuniones]
+
+    # Load all posicion=1 rows for these reuniones (including invitados)
+    posicion_1_rows = (
+        db.query(Posicion)
+        .filter(
+            Posicion.id_reunion.in_(reunion_ids),
+            Posicion.posicion == 1,
+        )
+        .all()
+    )
+
+    # Build a map: id_reunion → ganador dict or None
+    # Only mark as ganador when posicion=1 AND es_invitado=False
+    ganador_map: dict[int, dict | None] = {}
+    jugador_ids_needed = {
+        p.id_jugador for p in posicion_1_rows if not p.es_invitado and p.id_jugador is not None
+    }
+
+    jugador_info: dict[int, dict] = {}
+    if jugador_ids_needed:
+        jugadores = (
+            db.query(Jugador)
+            .filter(Jugador.id.in_(jugador_ids_needed))
+            .all()
+        )
+        jugador_info = {j.id: {"nombre": j.nombre, "foto_url": j.foto_url} for j in jugadores}
+
+    for p in posicion_1_rows:
+        if p.es_invitado or p.id_jugador is None:
+            ganador_map[p.id_reunion] = None
+        else:
+            info = jugador_info.get(p.id_jugador, {})
+            ganador_map[p.id_reunion] = {
+                "id_jugador": p.id_jugador,
+                "nombre": info.get("nombre", ""),
+                "foto_url": info.get("foto_url"),
+            }
+
+    # Build enriched response dicts
+    return [
+        {
+            "id": r.id,
+            "numero_jornada": r.numero_jornada,
+            "fecha": r.fecha,
+            "ganador": ganador_map.get(r.id),
+        }
+        for r in reuniones
+    ]
 
 
 def get_resultados_reunion(db: Session, reunion_id: int) -> dict:

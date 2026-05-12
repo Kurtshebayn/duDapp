@@ -38,9 +38,38 @@ class ReunionResultadosResponse(BaseModel):
     posiciones: list[PosicionResultadoResponse]
 
 
+class JugadorGanadorResponse(BaseModel):
+    """Brief jugador info used as the winner in a reunion summary."""
+
+    id_jugador: int
+    nombre: str
+    foto_url: str | None = None
+
+
 class ReunionResumenResponse(BaseModel):
     id: int
     numero_jornada: int
     fecha: date | None
+    ganador: JugadorGanadorResponse | None = None
 
-    model_config = {"from_attributes": True}
+
+class RankingNarrativoEntry(BaseModel):
+    """
+    One entry in the narrative ranking for the active temporada.
+
+    delta_posicion uses the SEMANTIC convention (decisions-supplement engram #98):
+      delta = anterior_posicion - nueva_posicion
+      Positive  → player rose (improved rank).
+      Negative  → player dropped.
+      Zero      → first appearance or unchanged.
+    """
+
+    id_jugador: int
+    nombre: str
+    foto_url: str | None = None
+    puntos: int
+    asistencias: int
+    posicion: int
+    delta_posicion: int
+    racha: int
+    lider_desde_jornada: int | None = None
