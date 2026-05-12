@@ -1,17 +1,19 @@
 """
-Snapshot generation and replay service.
+Snapshot generation, replay, and narrative read service.
 
 Responsibilities:
 - _generar_snapshots_para_reunion: compute cumulative ranking up to a given
   reunion and persist PosicionSnapshot rows for all inscritos with asistencias > 0.
 - _regenerar_snapshots_temporada: delete all snapshots for a temporada and
   replay for every reunion in numero_jornada order (delete-all + full replay).
+- get_ranking_narrativo: on-read computation of narrative fields (delta, racha,
+  lider_desde_jornada) for the current active temporada.
 
-Both helpers are transactional — they MUST be called inside an open transaction
-(before db.commit()) in the calling service.
-
-The public get_ranking_narrativo function (Phase E) will be added here in PR 3.
+Both write helpers are transactional — they MUST be called inside an open
+transaction (before db.commit()) in the calling service.
 """
+
+from collections import defaultdict
 
 from sqlalchemy.orm import Session
 
@@ -20,6 +22,12 @@ from app.models.jugador import Jugador
 from app.models.posicion import Posicion
 from app.models.posicion_snapshot import PosicionSnapshot
 from app.models.reunion import Reunion
+from app.models.temporada import EstadoTemporada, Temporada
+from app.services.narrativa import (
+    compute_delta_posicion,
+    compute_lider_desde_jornada,
+    compute_racha,
+)
 from app.services.ranking import assign_competition_ranks, calcular_ranking
 
 
@@ -130,3 +138,86 @@ def _regenerar_snapshots_temporada(db: Session, temporada_id: int) -> None:
 
     for reunion in reuniones:
         _generar_snapshots_para_reunion(db, temporada_id, reunion.id)
+
+
+# ---------------------------------------------------------------------------
+# Public read: narrative ranking
+# ---------------------------------------------------------------------------
+
+
+def get_ranking_narrativo(db: Session) -> list[dict]:
+    """
+    Return the current ranking of the active temporada enriched with
+    delta_posicion, racha, and lider_desde_jornada per player.
+
+    Returns an empty list when there is no active temporada or no snapshots exist.
+
+    delta_posicion uses the SEMANTIC convention (decisions-supplement #98):
+      delta = anterior_posicion - nueva_posicion
+      Positive → rose. Negative → dropped. Zero → first appearance or unchanged.
+    """
+    # 1. Resolve active temporada — return [] if none exists
+    temporada = (
+        db.query(Temporada)
+        .filter(Temporada.estado == EstadoTemporada.activa)
+        .first()
+    )
+    if not temporada:
+        return []
+
+    # 2. Load inscripciones and all posiciones for the current ranking
+    from app.services.consultas import _get_inscripciones, _get_todas_posiciones
+
+    inscripciones = _get_inscripciones(db, temporada.id)
+    posiciones = _get_todas_posiciones(db, temporada.id)
+
+    ranking = calcular_ranking(inscripciones, posiciones)
+    if not ranking:
+        return []
+
+    ranked_actual = assign_competition_ranks(ranking)
+
+    # Build foto_url map
+    foto_map = {i["id_jugador"]: i["foto_url"] for i in inscripciones}
+
+    # 3. Load full snapshot history for the temporada — one query with JOIN on reuniones
+    rows = (
+        db.query(
+            PosicionSnapshot.id_jugador,
+            PosicionSnapshot.posicion,
+            Reunion.numero_jornada,
+        )
+        .join(Reunion, Reunion.id == PosicionSnapshot.id_reunion)
+        .filter(PosicionSnapshot.id_temporada == temporada.id)
+        .order_by(PosicionSnapshot.id_jugador, Reunion.numero_jornada)
+        .all()
+    )
+
+    # 4. Group history by id_jugador (already ordered by numero_jornada)
+    history_by_jugador: dict[int, list[dict]] = defaultdict(list)
+    for id_jugador, posicion, numero_jornada in rows:
+        history_by_jugador[id_jugador].append(
+            {"numero_jornada": numero_jornada, "posicion": posicion}
+        )
+
+    # 5. Build enriched entries
+    result: list[dict] = []
+    for entry in ranked_actual:
+        pid = entry["id_jugador"]
+        history = history_by_jugador.get(pid, [])
+
+        result.append(
+            {
+                "id_jugador": pid,
+                "nombre": entry["nombre"],
+                "foto_url": foto_map.get(pid),
+                "puntos": entry["puntos"],
+                "asistencias": entry["asistencias"],
+                "posicion": entry["posicion"],
+                "delta_posicion": compute_delta_posicion(history),
+                "racha": compute_racha(history),
+                "lider_desde_jornada": compute_lider_desde_jornada(history),
+            }
+        )
+
+    return result

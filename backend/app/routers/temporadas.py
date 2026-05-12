@@ -9,6 +9,7 @@ from app.database import get_db
 from app.models.usuario import Usuario
 from app.schemas.consultas import (
     RankingEntryResponse,
+    RankingNarrativoEntry,
     ReunionResumenResponse,
     TemporadaActivaDetalleResponse,
 )
@@ -23,6 +24,7 @@ from app.schemas.temporada import (
 from app.services import consultas as consultas_service
 from app.services import import_temporada as import_service
 from app.services import reunion as reunion_service
+from app.services import snapshots as snapshots_service
 from app.services import temporada as temporada_service
 
 router = APIRouter(prefix="/temporadas", tags=["temporadas"])
@@ -129,3 +131,14 @@ def ranking_temporada_activa(db: Session = Depends(get_db)):
 @router.get("/activa/reuniones", response_model=list[ReunionResumenResponse])
 def listar_reuniones_temporada_activa(db: Session = Depends(get_db)):
     return consultas_service.get_reuniones_activa(db)
+
+
+@router.get("/activa/ranking-narrativo", response_model=list[RankingNarrativoEntry])
+def ranking_narrativo_temporada_activa(db: Session = Depends(get_db)):
+    """
+    Public endpoint — no auth required.
+    Returns the current ranking of the active temporada enriched with narrative
+    fields: delta_posicion (SEMANTIC convention), racha, lider_desde_jornada.
+    Returns an empty list when there is no active temporada or no snapshots exist.
+    """
+    return snapshots_service.get_ranking_narrativo(db)

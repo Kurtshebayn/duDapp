@@ -82,10 +82,8 @@ Variables esperadas:
 
 App ya en producción (Render + Vercel + Neon). Backlog priorizado (orden recomendado):
 
-1. **Position snapshots backend** — habilita narrativas tipo "sube 1", "racha de 3", "líder desde J-09".
-2. **Avatar de ganador en lista pública de Reuniones** — depende del endpoint enriquecido por (1).
-3. **UI de desempate al cierre de temporada** — requiere `id_campeon` en `Temporada` + admin flow post-cierre (topic engram: `dudapp/backlog/season-tiebreaker-admin-flow`).
-4. **Test suite frontend** — Vitest + React Testing Library; el más costoso y menos urgente.
+1. **UI de desempate al cierre de temporada** — requiere `id_campeon` en `Temporada` + admin flow post-cierre (topic engram: `dudapp/backlog/season-tiebreaker-admin-flow`).
+2. **Test suite frontend** — Vitest + React Testing Library; el más costoso y menos urgente.
 
 Notas:
 - R-05 (documentar reset de contraseña) está **fuera de scope** por decisión explícita del usuario. No proponerlo en backlogs futuros aunque siga apareciendo en docs antiguas.
@@ -117,5 +115,6 @@ App desplegada a producción (Render + Vercel + Neon, 2026-05-11). Drag & drop v
 - **historico-aggregations** — vista pública de estadísticas cross-temporadas (PR #4, shipped 2026-05-05).
 - **sync-docs-to-post-neon-state** — docs y ADRs sincronizados con la migración Render→Neon (2026-05-03).
 - **cleanup-estadisticas** — vista pública `/estadisticas` y endpoint `/temporadas/activa/estadisticas` eliminados; `/ranking` cubre el caso de uso tras la unificación del redesign (PR #6, shipped 2026-05-11). Item 1 del backlog Phase 7.
+- **position-snapshots** — tabla `posicion_snapshot`, endpoint público `GET /temporadas/activa/ranking-narrativo` (delta_posicion, racha, lider_desde_jornada), y enriquecimiento del endpoint `GET /temporadas/activa/reuniones` con campo `ganador`. Entregado en 3 PRs apilados (#7 modelo+ranking, #8 snapshots+narrativa, #9 endpoints+ganador, 2026-05-11). Items 1 y 2 del backlog Phase 7 completados.
 
 Ver /docs/roadmap.md para detalle completo.
