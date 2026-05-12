@@ -23,6 +23,7 @@ from app.models.posicion import Posicion
 from app.models.posicion_snapshot import PosicionSnapshot
 from app.models.reunion import Reunion
 from app.models.temporada import EstadoTemporada, Temporada
+from app.services.consultas import get_inscripciones, get_todas_posiciones
 from app.services.narrativa import (
     compute_delta_posicion,
     compute_lider_desde_jornada,
@@ -166,10 +167,8 @@ def get_ranking_narrativo(db: Session) -> list[dict]:
         return []
 
     # 2. Load inscripciones and all posiciones for the current ranking
-    from app.services.consultas import _get_inscripciones, _get_todas_posiciones
-
-    inscripciones = _get_inscripciones(db, temporada.id)
-    posiciones = _get_todas_posiciones(db, temporada.id)
+    inscripciones = get_inscripciones(db, temporada.id)
+    posiciones = get_todas_posiciones(db, temporada.id)
 
     ranking = calcular_ranking(inscripciones, posiciones)
     if not ranking:
