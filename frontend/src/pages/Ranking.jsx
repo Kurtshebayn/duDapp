@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { getRanking, getReuniones, getTemporadaActiva } from '../services/api'
+import { getRankingNarrativo, getReuniones, getTemporadaActiva } from '../services/api'
 import PlayerAvatar from '../components/PlayerAvatar'
+import NarrativeBadges from '../components/NarrativeBadges'
 import PageHeader from '../components/PageHeader'
 import { parseLocalDate, formatShortDate, maxDate } from '../lib/dates'
 import {
@@ -28,7 +29,7 @@ export default function Ranking() {
 
   useEffect(() => {
     Promise.all([
-      getRanking(),
+      getRankingNarrativo(),
       getReuniones(),
       getTemporadaActiva(),
     ])
@@ -156,6 +157,7 @@ export default function Ranking() {
                     </span>
                     <div className="player-name">{e.nombre}</div>
                     <div className="player-meta">{e.asistencias} asistencias</div>
+                    <NarrativeBadges entry={e} variant="podium" />
                     <div className="stat-row">
                       <div className="stat">
                         <div className="k">Puntos</div>
@@ -205,6 +207,7 @@ export default function Ranking() {
                   <PlayerAvatar nombre={e.nombre} fotoUrl={e.foto_url} size={36} />
                   <div className="name-text">
                     <span className="apodo">{e.nombre}</span>
+                    <NarrativeBadges entry={e} variant="table" />
                     <small>{e.asistencias} asistencias</small>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getReuniones, getTemporadaActiva } from '../services/api'
+import PlayerAvatar from '../components/PlayerAvatar'
 import PageHeader from '../components/PageHeader'
 import { parseLocalDate, formatShortDate, formatDayMonth, maxDate } from '../lib/dates'
 
@@ -85,6 +86,15 @@ export default function Reuniones() {
             <div className="pos num">{String(r.numero_jornada).padStart(2, '0')}</div>
             <div className="row-fecha">
               {formatDayMonth(parseLocalDate(r.fecha)) || 'Sin fecha'}
+            </div>
+            <div className="row-ganador" aria-hidden={r.ganador === null ? 'true' : undefined}>
+              {r.ganador != null && (
+                <PlayerAvatar
+                  nombre={r.ganador.nombre}
+                  fotoUrl={r.ganador.foto_url}
+                  size={28}
+                />
+              )}
             </div>
             <div className="arrow" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">

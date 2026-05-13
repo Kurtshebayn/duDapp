@@ -34,7 +34,7 @@ function authHeaders(token) {
 
 // ── Public ────────────────────────────────────────────────────────────────────
 
-export const getRanking = () => apiFetch('/temporadas/activa/ranking')
+export const getRankingNarrativo = () => apiFetch('/temporadas/activa/ranking-narrativo')
 export const getReuniones = () => apiFetch('/temporadas/activa/reuniones')
 export const getResultadosReunion = (id) => apiFetch(`/reuniones/${id}`)
 export const getTemporadaActiva = () => apiFetch('/temporadas/activa')

@@ -83,8 +83,6 @@ Variables esperadas:
 App ya en producción (Render + Vercel + Neon). Backlog priorizado (orden recomendado):
 
 1. **UI de desempate al cierre de temporada** — requiere `id_campeon` en `Temporada` + admin flow post-cierre (topic engram: `dudapp/backlog/season-tiebreaker-admin-flow`).
-2. **frontend-narrativas-y-ganador** — consumir `/temporadas/activa/ranking-narrativo` en `Ranking.jsx` (microcopy "sube N", "racha de N", "líder desde J-N") y renderizar avatar del `ganador` en `Reuniones.jsx`. Backend ya shippeado, frontend pendiente (topic engram: `dudapp/backlog/frontend-narrativas-y-ganador`).
-3. **Test suite frontend** — Vitest + React Testing Library; el más costoso y menos urgente.
 
 Notas:
 - R-05 (documentar reset de contraseña) está **fuera de scope** por decisión explícita del usuario. No proponerlo en backlogs futuros aunque siga apareciendo en docs antiguas.
@@ -117,5 +115,6 @@ App desplegada a producción (Render + Vercel + Neon, 2026-05-11). Drag & drop v
 - **sync-docs-to-post-neon-state** — docs y ADRs sincronizados con la migración Render→Neon (2026-05-03).
 - **cleanup-estadisticas** — vista pública `/estadisticas` y endpoint `/temporadas/activa/estadisticas` eliminados; `/ranking` cubre el caso de uso tras la unificación del redesign (PR #6, shipped 2026-05-11). Item 1 del backlog Phase 7.
 - **position-snapshots** — tabla `posicion_snapshot`, endpoint público `GET /temporadas/activa/ranking-narrativo` (delta_posicion, racha, lider_desde_jornada), y enriquecimiento del endpoint `GET /temporadas/activa/reuniones` con campo `ganador`. Entregado en 3 PRs apilados (#7 modelo+ranking, #8 snapshots+narrativa, #9 endpoints+ganador, 2026-05-11). Items 1 y 2 del backlog Phase 7 completados.
+- **frontend-narrativas-y-ganador** — `Ranking.jsx` ahora consume `/temporadas/activa/ranking-narrativo` y renderiza pills "sube N" / "cae N" / "racha de N" / "líder desde J-N" (priority `líder > racha > delta`, cap 2 en tabla, full en podio). `Reuniones.jsx` renderiza avatar del ganador en 4ª columna del grid con placeholder vacío cuando `ganador=null`. Frontend test suite (Vitest + React Testing Library + jsdom) instalada como parte del cambio — 49 tests verdes (6 archivos, 1.43s). PR único con `size:exception` (forecast 486 líneas, ~70% tests). Item 2 del backlog Phase 7 completado.
 
 Ver /docs/roadmap.md para detalle completo.
