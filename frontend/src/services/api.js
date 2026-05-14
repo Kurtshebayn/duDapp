@@ -76,10 +76,25 @@ export function editarReunion(token, reunionId, fecha, posiciones) {
   })
 }
 
+/**
+ * Closes the season. The response now includes:
+ *   campeon_id: number | null
+ *   tie_detected: boolean
+ *   tied_players?: Array<{ id_jugador: number, nombre: string }>  // present only when tie_detected
+ * Callers should branch on response.tie_detected.
+ */
 export function cerrarTemporada(token, temporadaId) {
   return apiFetch(`/temporadas/${temporadaId}/cerrar`, {
     method: 'POST',
     headers: authHeaders(token),
+  })
+}
+
+export function designarCampeon(token, temporadaId, idJugador) {
+  return apiFetch(`/temporadas/${temporadaId}/campeon`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ id_jugador: idJugador }),
   })
 }
 

@@ -5,6 +5,7 @@ import {
   getTemporadaActiva,
   getReuniones,
   cerrarTemporada,
+  designarCampeon,
   getJugadores,
   subirFotoJugador,
   crearJugador,
@@ -12,6 +13,7 @@ import {
 } from '../../services/api'
 import PlayerAvatar from '../../components/PlayerAvatar'
 import PageHeader from '../../components/PageHeader'
+import ChampionPickerModal from '../../components/ChampionPickerModal'
 import { parseLocalDate, formatDayMonth } from '../../lib/dates'
 
 export default function Dashboard() {
@@ -31,6 +33,12 @@ export default function Dashboard() {
   const [nuevoNombre, setNuevoNombre] = useState('')
   const [creandoJugador, setCreandoJugador] = useState(false)
   const [errorModal, setErrorModal] = useState(null)
+
+  const [tieModalOpen, setTieModalOpen] = useState(false)
+  const [tiedPlayers, setTiedPlayers] = useState([])
+  const [closingTemporadaId, setClosingTemporadaId] = useState(null)
+  const [designandoCampeon, setDesignandoCampeon] = useState(false)
+  const [errorTiebreaker, setErrorTiebreaker] = useState(null)
 
   const [agregandoId, setAgregandoId] = useState(null)
 
@@ -52,13 +60,47 @@ export default function Dashboard() {
     setCerrando(true)
     setError(null)
     try {
-      await cerrarTemporada(token, temporada.id)
-      await cargar()
+      const response = await cerrarTemporada(token, temporada.id)
+      if (response?.tie_detected === true) {
+        setTiedPlayers(response.tied_players ?? [])
+        setClosingTemporadaId(temporada.id)
+        setErrorTiebreaker(null)
+        setTieModalOpen(true)
+        // Do NOT call cargar() yet — wait for admin to resolve or cancel
+      } else {
+        await cargar()
+      }
     } catch (err) {
       setError(err.message)
     } finally {
       setCerrando(false)
     }
+  }
+
+  async function handleDesignarCampeon(idJugador) {
+    if (!closingTemporadaId) return
+    setDesignandoCampeon(true)
+    setErrorTiebreaker(null)
+    try {
+      await designarCampeon(token, closingTemporadaId, idJugador)
+      setTieModalOpen(false)
+      setTiedPlayers([])
+      setClosingTemporadaId(null)
+      await cargar()
+    } catch (err) {
+      setErrorTiebreaker(err.message)
+    } finally {
+      setDesignandoCampeon(false)
+    }
+  }
+
+  function handleCancelarTiebreaker() {
+    if (designandoCampeon) return
+    setTieModalOpen(false)
+    setTiedPlayers([])
+    setClosingTemporadaId(null)
+    setErrorTiebreaker(null)
+    cargar()
   }
 
   async function copiarLink() {
@@ -309,6 +351,16 @@ export default function Dashboard() {
           })}
         </div>
       )}
+
+      {/* ── Modal Desempate Campeón ────────────────────────────────── */}
+      <ChampionPickerModal
+        open={tieModalOpen}
+        tiedPlayers={tiedPlayers}
+        onPick={handleDesignarCampeon}
+        onCancel={handleCancelarTiebreaker}
+        loading={designandoCampeon}
+        error={errorTiebreaker}
+      />
 
       {/* ── Modal Nuevo Jugador ────────────────────────────────────── */}
       {showNuevoJugador && (
