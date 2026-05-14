@@ -78,11 +78,9 @@ Variables esperadas:
 - JWT_SECRET — clave para firmar tokens
 - CORS_ORIGINS — dominios permitidos del frontend
 
-## Fase actual: Fase 7 — Post-launch
+## Fase actual: Fase 7 — Post-launch (completa)
 
-App ya en producción (Render + Vercel + Neon). Backlog priorizado (orden recomendado):
-
-1. **UI de desempate al cierre de temporada** — requiere `id_campeon` en `Temporada` + admin flow post-cierre (topic engram: `dudapp/backlog/season-tiebreaker-admin-flow`).
+App en producción (Render + Vercel + Neon). **Backlog vacío** — todos los items priorizados se shipearon. Próximo paso del proyecto: definir Phase 8 o capturar nuevos requirements.
 
 Notas:
 - R-05 (documentar reset de contraseña) está **fuera de scope** por decisión explícita del usuario. No proponerlo en backlogs futuros aunque siga apareciendo en docs antiguas.
@@ -116,5 +114,6 @@ App desplegada a producción (Render + Vercel + Neon, 2026-05-11). Drag & drop v
 - **cleanup-estadisticas** — vista pública `/estadisticas` y endpoint `/temporadas/activa/estadisticas` eliminados; `/ranking` cubre el caso de uso tras la unificación del redesign (PR #6, shipped 2026-05-11). Item 1 del backlog Phase 7.
 - **position-snapshots** — tabla `posicion_snapshot`, endpoint público `GET /temporadas/activa/ranking-narrativo` (delta_posicion, racha, lider_desde_jornada), y enriquecimiento del endpoint `GET /temporadas/activa/reuniones` con campo `ganador`. Entregado en 3 PRs apilados (#7 modelo+ranking, #8 snapshots+narrativa, #9 endpoints+ganador, 2026-05-11). Items 1 y 2 del backlog Phase 7 completados.
 - **frontend-narrativas-y-ganador** — `Ranking.jsx` ahora consume `/temporadas/activa/ranking-narrativo` y renderiza pills "sube N" / "cae N" / "racha de N" / "líder desde J-N" (priority `líder > racha > delta`, cap 2 en tabla, full en podio). `Reuniones.jsx` renderiza avatar del ganador en 4ª columna del grid con placeholder vacío cuando `ganador=null`. Frontend test suite (Vitest + React Testing Library + jsdom) instalada como parte del cambio — 49 tests verdes (6 archivos, 1.43s). PR único con `size:exception` (forecast 486 líneas, ~70% tests). Item 2 del backlog Phase 7 completado.
+- **season-tiebreaker-admin-flow** — auto-set de `campeon_id` al cerrar temporada cuando hay un único ganador + endpoint admin idempotente `POST /temporadas/{id}/campeon` para designar campeón en cualquier temporada cerrada (habilita backfill de las 5 históricas sin UI extra). Frontend: `ChampionPickerModal` aparece al cerrar si `tie_detected: true`, lista N empatados, persiste pick vía endpoint. Backend: tie detection en `services/ranking.py` (recomputa por call), Pydantic v2 `@model_serializer(mode='wrap')` en `TemporadaResponse` para omitir `tied_players` cuando es None (patrón `dudapp/patterns/temporada-response-serialization`). Entregado en 2 PRs apilados (#11 backend 612 LOC, #12 frontend 492 LOC, 2026-05-14). 46 tests nuevos (29 backend + 17 frontend), total 341 tests verdes. Último item del backlog Phase 7 completado.
 
 Ver /docs/roadmap.md para detalle completo.
