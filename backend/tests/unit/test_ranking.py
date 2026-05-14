@@ -1,4 +1,4 @@
-from app.services.ranking import calcular_ranking
+from app.services.ranking import calcular_ranking, detect_max_points_holders
 
 
 # Estructura de datos para estas funciones:
@@ -73,3 +73,74 @@ def test_ranking_acumula_puntos_de_varias_reuniones():
 
     assert ranking[0]["puntos"] == 29
     assert ranking[0]["asistencias"] == 2
+
+
+# ── detect_max_points_holders ─────────────────────────────────────────────────
+
+
+def test_detect_max_points_holders_sin_inscripciones_devuelve_lista_vacia():
+    assert detect_max_points_holders([], []) == []
+
+
+def test_detect_max_points_holders_sin_asistencias_devuelve_lista_vacia():
+    inscritos = [{"id_jugador": 1, "nombre": "Ana"}]
+    assert detect_max_points_holders(inscritos, []) == []
+
+
+def test_detect_max_points_holders_un_solo_ganador():
+    inscritos = [
+        {"id_jugador": 1, "nombre": "Ana"},
+        {"id_jugador": 2, "nombre": "Bruno"},
+    ]
+    posiciones = [
+        {"id_jugador": 1, "es_invitado": False, "puntos": 15},
+        {"id_jugador": 2, "es_invitado": False, "puntos": 14},
+    ]
+    result = detect_max_points_holders(inscritos, posiciones)
+    assert result == [{"id_jugador": 1, "nombre": "Ana"}]
+
+
+def test_detect_max_points_holders_empate_2_way():
+    inscritos = [
+        {"id_jugador": 1, "nombre": "Ana"},
+        {"id_jugador": 2, "nombre": "Bruno"},
+    ]
+    posiciones = [
+        {"id_jugador": 1, "es_invitado": False, "puntos": 15},
+        {"id_jugador": 2, "es_invitado": False, "puntos": 15},
+    ]
+    result = detect_max_points_holders(inscritos, posiciones)
+    assert len(result) == 2
+    ids = {p["id_jugador"] for p in result}
+    assert ids == {1, 2}
+
+
+def test_detect_max_points_holders_empate_3_way():
+    inscritos = [
+        {"id_jugador": 1, "nombre": "Ana"},
+        {"id_jugador": 2, "nombre": "Bruno"},
+        {"id_jugador": 3, "nombre": "Carlos"},
+    ]
+    posiciones = [
+        {"id_jugador": 1, "es_invitado": False, "puntos": 15},
+        {"id_jugador": 2, "es_invitado": False, "puntos": 15},
+        {"id_jugador": 3, "es_invitado": False, "puntos": 15},
+    ]
+    result = detect_max_points_holders(inscritos, posiciones)
+    assert len(result) == 3
+
+
+def test_detect_max_points_holders_empate_en_2do_pero_1ro_claro():
+    # Ana: 15 (clear 1st), Bruno + Carlos: 10 each (tie for 2nd)
+    inscritos = [
+        {"id_jugador": 1, "nombre": "Ana"},
+        {"id_jugador": 2, "nombre": "Bruno"},
+        {"id_jugador": 3, "nombre": "Carlos"},
+    ]
+    posiciones = [
+        {"id_jugador": 1, "es_invitado": False, "puntos": 15},
+        {"id_jugador": 2, "es_invitado": False, "puntos": 10},
+        {"id_jugador": 3, "es_invitado": False, "puntos": 10},
+    ]
+    result = detect_max_points_holders(inscritos, posiciones)
+    assert result == [{"id_jugador": 1, "nombre": "Ana"}]

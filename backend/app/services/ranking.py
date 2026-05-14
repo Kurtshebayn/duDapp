@@ -58,3 +58,34 @@ def calcular_ranking(
     ]
     resultado.sort(key=lambda x: x["puntos"], reverse=True)
     return resultado
+
+
+def detect_max_points_holders(
+    inscripciones: list[dict],
+    posiciones: list[dict],
+) -> list[dict]:
+    """
+    Returns the list of inscriptos who share the maximum point total
+    in the final ranking of a temporada (with `nombre` included).
+
+    Output shape: [{"id_jugador": int, "nombre": str}, ...]
+
+    Cases:
+    - 0 inscriptos with asistencias → []
+    - 1 player with asistencias → [that player]  (single winner)
+    - 2+ players tied at max points → all of them
+    - clear winner + others below → [that one player]
+
+    Caller decides "is this a tie?" by `len(result) > 1`.
+
+    Pure function — no DB, no HTTP. Bit-for-bit reuses calcular_ranking().
+    """
+    ranking = calcular_ranking(inscripciones, posiciones)
+    if not ranking:
+        return []
+    max_puntos = ranking[0]["puntos"]
+    return [
+        {"id_jugador": e["id_jugador"], "nombre": e["nombre"]}
+        for e in ranking
+        if e["puntos"] == max_puntos
+    ]
