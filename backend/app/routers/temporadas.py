@@ -69,6 +69,24 @@ def cerrar_temporada(
     return JSONResponse(content=body)
 
 
+@router.post("/{temporada_id}/campeon", response_model=TemporadaResponse)
+def designar_campeon(
+    temporada_id: int,
+    body: DesignarCampeonRequest,
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(get_current_user),
+):
+    temporada = temporada_service.designar_campeon(db, temporada_id, body.id_jugador)
+    return {
+        "id": temporada.id,
+        "nombre": temporada.nombre,
+        "fecha_inicio": temporada.fecha_inicio,
+        "estado": temporada.estado,
+        "campeon_id": temporada.campeon_id,
+        "tie_detected": False,   # endpoint doesn't carry tie semantics
+    }
+
+
 @router.post("/{temporada_id}/reuniones", response_model=ReunionResponse, status_code=201)
 def registrar_reunion(
     temporada_id: int,

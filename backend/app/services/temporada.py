@@ -89,6 +89,64 @@ def cerrar_temporada(db: Session, temporada_id: int) -> tuple[Temporada, bool, l
     return temporada, tie_detected, tied_players
 
 
+def designar_campeon(db: Session, temporada_id: int, id_jugador: int) -> Temporada:
+    """
+    Sets temporada.campeon_id to id_jugador, idempotent.
+
+    Validations (REQ-3 in spec) — first failure wins:
+    1. Temporada exists → 404
+    2. estado == cerrada → 422
+    3. id_jugador inscripto en esa temporada → 422
+    4. id_jugador is among the max-points holders of the final ranking → 422
+
+    Idempotent: same id → 200 no-op; different tied player → 200 overwrites.
+    """
+    from app.services import consultas as consultas_service
+    from app.services.ranking import detect_max_points_holders
+
+    temporada = db.query(Temporada).filter(Temporada.id == temporada_id).first()
+    if not temporada:
+        raise HTTPException(status_code=404, detail="Temporada no encontrada")
+
+    if temporada.estado != EstadoTemporada.cerrada:
+        raise HTTPException(
+            status_code=422,
+            detail="No se puede designar campeón en una temporada que no está cerrada.",
+        )
+
+    inscripto = (
+        db.query(Inscripcion)
+        .filter(
+            Inscripcion.id_temporada == temporada_id,
+            Inscripcion.id_jugador == id_jugador,
+        )
+        .first()
+    )
+    if not inscripto:
+        raise HTTPException(
+            status_code=422,
+            detail=f"El jugador {id_jugador} no está inscripto en la temporada {temporada_id}.",
+        )
+
+    inscripciones = consultas_service.get_inscripciones(db, temporada_id)
+    posiciones = consultas_service.get_todas_posiciones(db, temporada_id)
+    winners = detect_max_points_holders(inscripciones, posiciones)
+    winner_ids = {w["id_jugador"] for w in winners}
+
+    if id_jugador not in winner_ids:
+        raise HTTPException(
+            status_code=422,
+            detail=f"El jugador {id_jugador} no está entre los primeros del ranking final de la temporada {temporada_id}.",
+        )
+
+    # Idempotent set — same id is a no-op at the DB level (SQLAlchemy UPDATE
+    # to identical value); different id overwrites.
+    temporada.campeon_id = id_jugador
+    db.commit()
+    db.refresh(temporada)
+    return temporada
+
+
 def inscribir_jugador_en_activa(db: Session, id_jugador: int) -> Inscripcion:
     """
     Inscribe un jugador existente a la temporada activa, después de iniciada.
