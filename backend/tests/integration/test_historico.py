@@ -272,26 +272,24 @@ def test_resumen_temporada_activa_no_afecta(client, db, admin_user):
 def test_campeones_omite_temporada_sin_campeon(client, db, admin_user):
     headers = _auth_headers(client)
 
-    # S1: closed, campeon_id = NULL
+    # S1: closed, campeon_id remains NULL.
+    # No reuniones/posiciones → empty ranking → cerrar_temporada auto-set skipped.
+    # This models a historical imported season where no champion was designated.
     s1 = _crear_temporada(client, headers, "Liga 2022", "2022-01-01", ["Ana"])
     s1_id = s1["id"]
     jugadores = db.query(Jugador).order_by(Jugador.id).all()
     id_ana = jugadores[0].id
-    _registrar_reunion(client, headers, s1_id, "2022-01-10", [
-        {"id_jugador": id_ana, "es_invitado": False, "posicion": 1},
-    ])
     _cerrar_temporada(client, headers, s1_id)
-    # Leave campeon_id as NULL (don't set it)
+    # campeon_id stays NULL (empty ranking → no auto-set)
 
-    # S2: closed, campeon_id = Ana
+    # S2: closed, campeon_id = Ana (auto-set via the single-winner path)
     s2 = _crear_temporada(client, headers, "Liga 2023", "2023-01-01", ["Ana"])
     s2_id = s2["id"]
     _registrar_reunion(client, headers, s2_id, "2023-01-10", [
         {"id_jugador": id_ana, "es_invitado": False, "posicion": 1},
     ])
     _cerrar_temporada(client, headers, s2_id)
-    db.query(Temporada).filter(Temporada.id == s2_id).update({"campeon_id": id_ana})
-    db.commit()
+    # campeon_id is auto-set to Ana by cerrar_temporada (single winner)
 
     r = client.get("/historico/resumen")
     assert r.status_code == 200
