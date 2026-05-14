@@ -1600,11 +1600,15 @@ tbody td {
   border-color: var(--border-strong);
 }
 
-/* "líder desde J-N" — acento dorado consistente con --gold del podio */
+/* "líder desde J-N" — acento dorado consistente con --gold del podio.
+   max-width: none porque el contenido tiene upper bound conocido (~17 chars con J-99)
+   y la pill pierde toda utilidad informativa si se trunca a "líder desde". El
+   .narrative-strip tiene flex-wrap, así que si no entra en la fila pasa a la siguiente. */
 .narrative-pill--leader {
   background: rgba(176, 141, 60, 0.14);
   color: #7d6020;
   border-color: rgba(176, 141, 60, 0.32);
+  max-width: none;
 }
 
 /* ─── Back link editorial (icono + texto) ────────────────────────────── */
@@ -2215,6 +2219,10 @@ tbody td {
     font-size: 9px;
     padding: 1px 6px;
     max-width: 12ch;
+  }
+  /* Leader pill mantiene su excepción en mobile — el contenido es informativo, no decorativo */
+  .narrative-pill--leader {
+    max-width: none;
   }
   .narrative-strip {
     gap: 4px;

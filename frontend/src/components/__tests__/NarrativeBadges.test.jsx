@@ -35,6 +35,11 @@ describe('NarrativeBadges — variant="podium"', () => {
     expect(screen.queryByText(/^racha de/)).not.toBeInTheDocument()
   })
 
+  it('5b. racha: 1 → no racha badge (a single improvement is not a streak)', () => {
+    renderBadges({ delta_posicion: 0, racha: 1, lider_desde_jornada: null })
+    expect(screen.queryByText(/^racha de/)).not.toBeInTheDocument()
+  })
+
   it('6. lider_desde_jornada: 3 → badge text "líder desde J-3" present', () => {
     renderBadges({ delta_posicion: 0, racha: 0, lider_desde_jornada: 3 })
     expect(screen.getByText('líder desde J-3')).toBeInTheDocument()

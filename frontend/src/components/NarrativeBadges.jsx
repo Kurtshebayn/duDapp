@@ -18,7 +18,9 @@ export default function NarrativeBadges({ entry, variant }) {
       text: `líder desde J-${entry.lider_desde_jornada}`,
     })
   }
-  if (entry.racha > 0) {
+  // Una racha real requiere 2+ jornadas consecutivas con mejora.
+  // racha=1 es solo un primer salto, no una racha — además se solapa con "sube N".
+  if (entry.racha >= 2) {
     badges.push({
       key: 'racha',
       tone: 'racha',
