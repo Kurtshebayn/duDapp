@@ -65,3 +65,8 @@ migration/
 *.swo
 .DS_Store
 Thumbs.db
+
+# ── Agent tooling (per-session, no compartido) ────────────────────────────────
+.atl/
+.claude/settings.local.json
+.claude/worktrees/
