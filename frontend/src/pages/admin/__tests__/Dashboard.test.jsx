@@ -210,6 +210,9 @@ describe('Dashboard — handleCerrar tie-detection branching', () => {
 
     expect(vi.mocked(api.designarCampeon)).not.toHaveBeenCalled()
 
+    // Cancel still triggers cargar() to refresh the view (the season is now closed)
+    expect(vi.mocked(api.getTemporadaActiva).mock.calls.length).toBeGreaterThanOrEqual(2)
+
     // Modal closed
     await waitFor(() => {
       expect(screen.queryByTestId('champion-picker-modal')).not.toBeInTheDocument()

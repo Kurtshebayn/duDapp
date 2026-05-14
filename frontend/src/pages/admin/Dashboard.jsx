@@ -100,7 +100,6 @@ export default function Dashboard() {
     setTiedPlayers([])
     setClosingTemporadaId(null)
     setErrorTiebreaker(null)
-    // No API call — campeon_id stays null on the closed season
     cargar()
   }
 

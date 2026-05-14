@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 /**
  * Modal for resolving a tiebreaker after closing a season.
@@ -12,6 +12,10 @@ import { useState } from 'react'
  */
 export default function ChampionPickerModal({ open, tiedPlayers, onPick, onCancel, loading, error }) {
   const [selectedId, setSelectedId] = useState(null)
+
+  useEffect(() => {
+    if (!open) setSelectedId(null)
+  }, [open])
 
   if (!open) return null
 
