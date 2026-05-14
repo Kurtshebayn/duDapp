@@ -1,6 +1,6 @@
 from datetime import date
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_serializer
 
 from app.schemas.jugador import JugadorInput
 
@@ -26,6 +26,15 @@ class TemporadaResponse(BaseModel):
     tied_players: list[TiedPlayerSchema] | None = None
 
     model_config = {"from_attributes": True}
+
+    @model_serializer(mode="wrap")
+    def _omit_tied_players_when_none(self, handler):
+        # REQ-6 / D6: tied_players key is OMITTED entirely when no tie exists.
+        # campeon_id and tie_detected remain present (REQ-5).
+        data = handler(self)
+        if data.get("tied_players") is None:
+            data.pop("tied_players", None)
+        return data
 
 
 class DesignarCampeonRequest(BaseModel):

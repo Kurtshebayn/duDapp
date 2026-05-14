@@ -318,6 +318,7 @@ def test_crear_temporada_devuelve_campeon_id_null_y_tie_detected_false(client, a
     data = r.json()
     assert data["campeon_id"] is None
     assert data["tie_detected"] is False
+    assert "tied_players" not in data
 
 
 # ── T-09: POST /temporadas/{id}/campeon integration tests ─────────────────────
@@ -353,6 +354,7 @@ def test_designar_campeon_happy_path_setea_campeon_id(client, auth_headers, juga
     data = r.json()
     assert data["campeon_id"] == j_ana.id
     assert data["estado"] == "cerrada"
+    assert "tied_players" not in data
 
 
 def test_designar_campeon_requiere_jwt_401(client, jugadores_en_db, db, auth_headers):
