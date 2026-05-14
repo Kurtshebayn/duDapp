@@ -48,17 +48,45 @@ def crear_temporada(db: Session, nombre: str, fecha_inicio: date, jugadores_inpu
     return temporada
 
 
-def cerrar_temporada(db: Session, temporada_id: int) -> Temporada:
+def cerrar_temporada(db: Session, temporada_id: int) -> tuple[Temporada, bool, list[dict] | None]:
+    """
+    Closes a temporada and computes tie state in a single transaction.
+
+    Returns (temporada, tie_detected, tied_players_or_none).
+
+    Behavior:
+    - If exactly ONE player holds max points: campeon_id auto-set to that id;
+      tie_detected=False; tied_players=None.
+    - If 2+ players tied at max: campeon_id stays None; tie_detected=True;
+      tied_players=[{id_jugador, nombre}, ...] (all tied).
+    - If ranking empty (no asistencias): campeon_id stays None;
+      tie_detected=False; tied_players=None.
+    """
+    from app.services import consultas as consultas_service
+    from app.services.ranking import detect_max_points_holders
+
     temporada = db.query(Temporada).filter(Temporada.id == temporada_id).first()
     if not temporada:
         raise HTTPException(status_code=404, detail="Temporada no encontrada")
     if temporada.estado == EstadoTemporada.cerrada:
         raise HTTPException(status_code=400, detail="La temporada ya está cerrada")
 
+    # Compute tie BEFORE flipping estado, so consultas_service helpers
+    # see the temporada in a consistent state (id-based, estado-agnostic).
+    inscripciones = consultas_service.get_inscripciones(db, temporada_id)
+    posiciones = consultas_service.get_todas_posiciones(db, temporada_id)
+    winners = detect_max_points_holders(inscripciones, posiciones)
+
+    tie_detected = len(winners) > 1
+    tied_players = winners if tie_detected else None
+
+    if len(winners) == 1:
+        temporada.campeon_id = winners[0]["id_jugador"]
+
     temporada.estado = EstadoTemporada.cerrada
     db.commit()
     db.refresh(temporada)
-    return temporada
+    return temporada, tie_detected, tied_players
 
 
 def inscribir_jugador_en_activa(db: Session, id_jugador: int) -> Inscripcion:

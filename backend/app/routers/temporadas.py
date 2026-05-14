@@ -2,6 +2,7 @@ from datetime import date
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import get_current_user
@@ -16,6 +17,7 @@ from app.schemas.consultas import (
 from app.schemas.import_temporada import ImportarTemporadaResponse
 from app.schemas.reunion import ReunionCreate, ReunionResponse
 from app.schemas.temporada import (
+    DesignarCampeonRequest,
     InscripcionCreate,
     InscripcionResponse,
     TemporadaCreate,
@@ -48,7 +50,23 @@ def cerrar_temporada(
     db: Session = Depends(get_db),
     _: Usuario = Depends(get_current_user),
 ):
-    return temporada_service.cerrar_temporada(db, temporada_id)
+    temporada, tie_detected, tied_players = temporada_service.cerrar_temporada(db, temporada_id)
+    # Build response manually so we can:
+    # - always include campeon_id: null (spec REQ-5)
+    # - omit tied_players entirely when None (spec REQ-6 / D6)
+    # Using JSONResponse with date serialization via isoformat().
+    from datetime import date as date_type
+    body: dict = {
+        "id": temporada.id,
+        "nombre": temporada.nombre,
+        "fecha_inicio": temporada.fecha_inicio.isoformat() if isinstance(temporada.fecha_inicio, date_type) else temporada.fecha_inicio,
+        "estado": temporada.estado.value if hasattr(temporada.estado, "value") else temporada.estado,
+        "campeon_id": temporada.campeon_id,
+        "tie_detected": tie_detected,
+    }
+    if tied_players is not None:
+        body["tied_players"] = tied_players
+    return JSONResponse(content=body)
 
 
 @router.post("/{temporada_id}/reuniones", response_model=ReunionResponse, status_code=201)
