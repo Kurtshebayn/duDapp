@@ -18,3 +18,4 @@ class Temporada(Base):
     estado = Column(Enum(EstadoTemporada), nullable=False, default=EstadoTemporada.activa)
     id_usuario = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
     campeon_id = Column(Integer, ForeignKey("jugadores.id", ondelete="SET NULL"), nullable=True)
+    fecha_cierre = Column(Date, nullable=True)
