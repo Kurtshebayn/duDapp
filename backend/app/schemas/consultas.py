@@ -73,3 +73,50 @@ class RankingNarrativoEntry(BaseModel):
     delta_posicion: int
     racha: int
     lider_desde_jornada: int | None = None
+
+
+class RankingEntryCerrada(BaseModel):
+    """
+    One entry in the final ranking of a closed temporada.
+
+    NO delta_posicion, NO lider_desde_jornada — only racha (frontend renders
+    the pill when >= 2). These fields are meaningless for a closed season
+    (design decision D5).
+    """
+
+    posicion: int
+    id_jugador: int
+    nombre: str
+    foto_url: str | None = None
+    puntos: int
+    asistencias: int
+    promedio: float
+    racha: int
+
+
+class CampeonResponse(BaseModel):
+    """Champion summary embedded in RankingUltimaCerradaResponse."""
+
+    id: int
+    nombre: str
+    foto_url: str | None = None
+    puntos: int
+    asistencias: int
+    promedio: float
+
+
+class RankingUltimaCerradaResponse(BaseModel):
+    """
+    Top-level response for GET /temporadas/ultima-cerrada/ranking-narrativo.
+
+    campeon = None when there is a tie with no designated champion (frontend
+    does NOT render the hero section in this case).
+    fecha_cierre = None for historical seasons imported before migration 0005
+    (frontend renders the hero without a date line).
+    """
+
+    temporada_id: int
+    temporada_nombre: str
+    fecha_cierre: date | None = None
+    campeon: CampeonResponse | None = None
+    ranking: list[RankingEntryCerrada]

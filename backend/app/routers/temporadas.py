@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, Form, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
@@ -11,6 +11,7 @@ from app.models.usuario import Usuario
 from app.schemas.consultas import (
     RankingEntryResponse,
     RankingNarrativoEntry,
+    RankingUltimaCerradaResponse,
     ReunionResumenResponse,
     TemporadaActivaDetalleResponse,
 )
@@ -178,3 +179,20 @@ def ranking_narrativo_temporada_activa(db: Session = Depends(get_db)):
     Returns an empty list when there is no active temporada or no snapshots exist.
     """
     return snapshots_service.get_ranking_narrativo(db)
+
+
+@router.get(
+    "/ultima-cerrada/ranking-narrativo",
+    response_model=RankingUltimaCerradaResponse,
+)
+def ranking_narrativo_ultima_cerrada(db: Session = Depends(get_db)):
+    """
+    Public endpoint — no auth required.
+    Returns the ranking + champion summary of the most recently closed temporada.
+    Ordering: ORDER BY fecha_cierre DESC NULLS LAST, id DESC.
+    Returns 404 when no closed temporada exists (fresh install or only active season).
+    """
+    result = snapshots_service.get_ranking_narrativo_cerrada(db)
+    if result is None:
+        raise HTTPException(status_code=404, detail="No hay temporadas cerradas")
+    return result

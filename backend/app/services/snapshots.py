@@ -15,6 +15,7 @@ transaction (before db.commit()) in the calling service.
 
 from collections import defaultdict
 
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from app.models.inscripcion import Inscripcion
@@ -220,3 +221,108 @@ def get_ranking_narrativo(db: Session) -> list[dict]:
         )
 
     return result
+
+
+def get_ranking_narrativo_cerrada(db: Session) -> dict | None:
+    """
+    Return the ranking + champion summary for the most recently closed temporada.
+
+    "Most recent" is resolved by ORDER BY fecha_cierre DESC NULLS LAST, id DESC:
+      - Seasons with a concrete fecha_cierre rank before NULL ones (post-migration preference).
+      - Among NULLs (bulk-imported historical seasons), higher id wins.
+
+    Returns None when no closed temporada exists (caller raises 404).
+
+    The returned dict has shape:
+      temporada_id, temporada_nombre, fecha_cierre, campeon (None or dict), ranking (list).
+
+    Each ranking entry includes: posicion, id_jugador, nombre, foto_url, puntos,
+    asistencias, promedio, racha — but NO delta_posicion and NO lider_desde_jornada
+    (design decision D5: those fields are only meaningful for a live season).
+    """
+    from sqlalchemy import nullslast
+
+    # 1. Resolve "última cerrada" — NULLS LAST on fecha_cierre, id DESC as tiebreaker
+    temporada = (
+        db.query(Temporada)
+        .filter(Temporada.estado == EstadoTemporada.cerrada)
+        .order_by(nullslast(desc(Temporada.fecha_cierre)), desc(Temporada.id))
+        .first()
+    )
+    if temporada is None:
+        return None
+
+    # 2. Load inscripciones + all posiciones for this temporada
+    inscripciones = get_inscripciones(db, temporada.id)
+    posiciones = get_todas_posiciones(db, temporada.id)
+
+    ranking = calcular_ranking(inscripciones, posiciones)
+    ranked_actual = assign_competition_ranks(ranking)
+
+    # Build foto_url map from inscripciones
+    foto_map = {i["id_jugador"]: i["foto_url"] for i in inscripciones}
+
+    # 3. Load full snapshot history for this temporada (same query as get_ranking_narrativo)
+    rows = (
+        db.query(
+            PosicionSnapshot.id_jugador,
+            PosicionSnapshot.posicion,
+            Reunion.numero_jornada,
+        )
+        .join(Reunion, Reunion.id == PosicionSnapshot.id_reunion)
+        .filter(PosicionSnapshot.id_temporada == temporada.id)
+        .order_by(PosicionSnapshot.id_jugador, Reunion.numero_jornada)
+        .all()
+    )
+
+    # 4. Group history by id_jugador
+    history_by_jugador: dict[int, list[dict]] = defaultdict(list)
+    for id_jugador, posicion, numero_jornada in rows:
+        history_by_jugador[id_jugador].append(
+            {"numero_jornada": numero_jornada, "posicion": posicion}
+        )
+
+    # 5. Build entries — only racha, no delta_posicion, no lider_desde_jornada
+    entries: list[dict] = []
+    for entry in ranked_actual:
+        pid = entry["id_jugador"]
+        history = history_by_jugador.get(pid, [])
+        asistencias = entry["asistencias"]
+        promedio = round(entry["puntos"] / asistencias, 1) if asistencias else 0.0
+        entries.append(
+            {
+                "posicion": entry["posicion"],
+                "id_jugador": pid,
+                "nombre": entry["nombre"],
+                "foto_url": foto_map.get(pid),
+                "puntos": entry["puntos"],
+                "asistencias": asistencias,
+                "promedio": promedio,
+                "racha": compute_racha(history),
+            }
+        )
+
+    # 6. Build embedded campeon dict — None when campeon_id is NULL (tie not resolved)
+    campeon_dict = None
+    if temporada.campeon_id is not None:
+        champ_entry = next(
+            (e for e in entries if e["id_jugador"] == temporada.campeon_id),
+            None,
+        )
+        if champ_entry is not None:
+            campeon_dict = {
+                "id": champ_entry["id_jugador"],
+                "nombre": champ_entry["nombre"],
+                "foto_url": champ_entry["foto_url"],
+                "puntos": champ_entry["puntos"],
+                "asistencias": champ_entry["asistencias"],
+                "promedio": champ_entry["promedio"],
+            }
+
+    return {
+        "temporada_id": temporada.id,
+        "temporada_nombre": temporada.nombre,
+        "fecha_cierre": temporada.fecha_cierre,
+        "campeon": campeon_dict,
+        "ranking": entries,
+    }

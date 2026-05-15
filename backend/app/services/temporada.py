@@ -83,6 +83,7 @@ def cerrar_temporada(db: Session, temporada_id: int) -> tuple[Temporada, bool, l
     if len(winners) == 1:
         temporada.campeon_id = winners[0]["id_jugador"]
 
+    temporada.fecha_cierre = date.today()
     temporada.estado = EstadoTemporada.cerrada
     db.commit()
     db.refresh(temporada)

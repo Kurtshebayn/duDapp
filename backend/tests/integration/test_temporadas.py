@@ -543,3 +543,53 @@ def test_designar_campeon_no_modifica_otros_campos(client, auth_headers, jugador
     temporada = db.query(Temporada).filter(Temporada.id == temporada_id).first()
     assert temporada.estado.value == "cerrada"
     assert temporada.campeon_id == j_ana.id
+
+
+# ── REQ-2: cerrar_temporada sets fecha_cierre ─────────────────────────────────
+
+
+def test_cerrar_temporada_setea_fecha_cierre_con_ganador_unico(client, auth_headers, jugadores_en_db, db):
+    """REQ-2 scenario: close without tie → fecha_cierre == date.today()."""
+    from datetime import date
+    from app.models.temporada import Temporada
+
+    temporada_id = _crear_temporada_con_jugadores(client, auth_headers, jugadores_en_db)
+    j_ana, j_bruno, j_carlos = jugadores_en_db
+    _seed_reunion_con_posiciones(db, temporada_id, [
+        (j_ana.id, 15),
+        (j_bruno.id, 14),
+        (j_carlos.id, 13),
+    ])
+
+    r = client.post(f"/temporadas/{temporada_id}/cerrar", headers=auth_headers)
+    assert r.status_code == 200
+    assert r.json()["estado"] == "cerrada"
+
+    db.expire_all()
+    temporada = db.query(Temporada).filter(Temporada.id == temporada_id).first()
+    assert temporada.fecha_cierre == date.today()
+
+
+def test_cerrar_temporada_setea_fecha_cierre_con_empate(client, auth_headers, jugadores_en_db, db):
+    """REQ-2 scenario: close with tie → fecha_cierre == date.today(), campeon_id stays None."""
+    from datetime import date
+    from app.models.temporada import Temporada
+
+    temporada_id = _crear_temporada_con_jugadores(client, auth_headers, jugadores_en_db)
+    j_ana, j_bruno, j_carlos = jugadores_en_db
+    _seed_reunion_con_posiciones(db, temporada_id, [
+        (j_ana.id, 15),
+        (j_bruno.id, 15),
+        (j_carlos.id, 13),
+    ])
+
+    r = client.post(f"/temporadas/{temporada_id}/cerrar", headers=auth_headers)
+    assert r.status_code == 200
+    data = r.json()
+    assert data["estado"] == "cerrada"
+    assert data["campeon_id"] is None
+    assert data["tie_detected"] is True
+
+    db.expire_all()
+    temporada = db.query(Temporada).filter(Temporada.id == temporada_id).first()
+    assert temporada.fecha_cierre == date.today()
