@@ -351,8 +351,8 @@ describe('Ranking.jsx — Closed mode (no active season, closed season exists)',
 
   it('18. closed mode: renders champion stats (puntos, asistencias, promedio)', async () => {
     await renderRankingClosed({ ultimaCerrada: makeUltimaCerrada() })
-    // champion-stats section has Puntos/Asistencias/Promedio labels + values
-    const heroSection = document.querySelector('.champion-hero')
+    // .champion-seal wraps the entire ornate hero, including the stats grid
+    const heroSection = document.querySelector('.champion-seal')
     expect(heroSection).not.toBeNull()
     expect(heroSection.textContent).toContain('90')
     expect(heroSection.textContent).toContain('15.0')
@@ -409,6 +409,19 @@ describe('Ranking.jsx — Closed mode (no active season, closed season exists)',
     render(<MemoryRouter><Ranking /></MemoryRouter>)
     await waitFor(() => expect(screen.queryByText(/Cargando/)).not.toBeInTheDocument())
     expect(screen.queryByText('CAMPEÓN')).not.toBeInTheDocument()
+  })
+
+  it('26.A closed mode: fecha_cierre present → eyebrow renders "Liga de Dudo · MMXXVI"', async () => {
+    await renderRankingClosed({ ultimaCerrada: makeUltimaCerrada({ fecha_cierre: '2026-05-10' }) })
+    // Eyebrow combina marca + año romano del año de cierre
+    expect(screen.getByText(/Liga de Dudo · MMXXVI/)).toBeInTheDocument()
+  })
+
+  it('26.B closed mode: fecha_cierre null → eyebrow muestra "Liga de Dudo" SIN año romano', async () => {
+    await renderRankingClosed({ ultimaCerrada: makeUltimaCerrada({ fecha_cierre: null }) })
+    expect(screen.getByText(/Liga de Dudo/)).toBeInTheDocument()
+    // Verificamos que NO aparece notación romana (cualquier letra M seguida de espacio o final)
+    expect(screen.queryByText(/MMXX/)).not.toBeInTheDocument()
   })
 })
 

@@ -8,7 +8,7 @@ import {
 import PlayerAvatar from '../components/PlayerAvatar'
 import NarrativeBadges from '../components/NarrativeBadges'
 import PageHeader from '../components/PageHeader'
-import { parseLocalDate, formatShortDate, formatLongDate, maxDate } from '../lib/dates'
+import { parseLocalDate, formatShortDate, formatLongDate, maxDate, toRoman } from '../lib/dates'
 import {
   assignRanks,
   getPodium,
@@ -283,15 +283,103 @@ export default function Ranking() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Closed mode render — inline function (~80 lines JSX, sub-100 threshold)
+// Ornamental SVG primitives for the champion seal
+// ─────────────────────────────────────────────────────────────────────────────
+
+function CornerOrnament({ position }) {
+  // Single shape; CSS handles rotation per corner.
+  return (
+    <svg
+      className={`seal-corner seal-corner-${position}`}
+      viewBox="0 0 40 40"
+      aria-hidden="true"
+    >
+      {/* Outer L-stroke */}
+      <path
+        d="M2 38 L2 10 Q2 2 10 2 L38 2"
+        stroke="currentColor"
+        strokeWidth="1"
+        fill="none"
+      />
+      {/* Inner L-stroke */}
+      <path
+        d="M7 38 L7 13 Q7 7 13 7 L38 7"
+        stroke="currentColor"
+        strokeWidth="1"
+        fill="none"
+      />
+      {/* Leaf flourish at the angle */}
+      <path
+        d="M12 18 Q15 14 19 14 Q17 17 13 19 Z"
+        fill="currentColor"
+        opacity="0.85"
+      />
+      <path
+        d="M18 12 Q14 15 14 19 Q17 17 19 13 Z"
+        fill="currentColor"
+        opacity="0.85"
+      />
+    </svg>
+  )
+}
+
+function LaurelSprig({ side }) {
+  // Single sprig; right side is mirrored via CSS.
+  return (
+    <svg
+      className={`seal-laurel seal-laurel-${side}`}
+      viewBox="0 0 56 120"
+      aria-hidden="true"
+    >
+      {/* Curving stem */}
+      <path
+        d="M 30 4 Q 18 30 22 60 Q 28 92 38 116"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        fill="none"
+      />
+      {/* Leaves cascading along the stem, slightly varied */}
+      <ellipse cx="22" cy="18" rx="7" ry="3" fill="currentColor" transform="rotate(-35 22 18)" />
+      <ellipse cx="20" cy="32" rx="8" ry="3.5" fill="currentColor" transform="rotate(-28 20 32)" />
+      <ellipse cx="20" cy="46" rx="9" ry="3.5" fill="currentColor" transform="rotate(-20 20 46)" />
+      <ellipse cx="22" cy="60" rx="9" ry="4" fill="currentColor" transform="rotate(-12 22 60)" />
+      <ellipse cx="26" cy="74" rx="9" ry="3.5" fill="currentColor" transform="rotate(-4 26 74)" />
+      <ellipse cx="30" cy="88" rx="8" ry="3.5" fill="currentColor" transform="rotate(4 30 88)" />
+      <ellipse cx="35" cy="102" rx="7" ry="3" fill="currentColor" transform="rotate(12 35 102)" />
+    </svg>
+  )
+}
+
+function TrophyMark() {
+  return (
+    <svg className="seal-trophy" viewBox="0 0 32 32" aria-hidden="true">
+      {/* Cup body */}
+      <path
+        d="M10 5 L22 5 L22 13 Q22 18 16 18 Q10 18 10 13 Z"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        fill="none"
+      />
+      {/* Handles */}
+      <path d="M10 7 Q5 7 5 11 Q5 14 10 14" stroke="currentColor" strokeWidth="1" fill="none" />
+      <path d="M22 7 Q27 7 27 11 Q27 14 22 14" stroke="currentColor" strokeWidth="1" fill="none" />
+      {/* Stem and base */}
+      <line x1="16" y1="18" x2="16" y2="24" stroke="currentColor" strokeWidth="1.2" />
+      <line x1="11" y1="26" x2="21" y2="26" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Closed mode render — ornate seal aesthetic
 // ─────────────────────────────────────────────────────────────────────────────
 
 function renderClosed(payload) {
   const { temporada_nombre, fecha_cierre, campeon, ranking } = payload
 
-  const fechaFmt = fecha_cierre
-    ? formatLongDate(parseLocalDate(fecha_cierre))
-    : null
+  const fechaParsed = fecha_cierre ? parseLocalDate(fecha_cierre) : null
+  const fechaFmt = fechaParsed ? formatLongDate(fechaParsed) : null
+  const yearRoman = fechaParsed ? toRoman(fechaParsed.getFullYear()) : ''
 
   return (
     <section className="ranking-page editorial-page closed-season">
@@ -309,34 +397,70 @@ function renderClosed(payload) {
 
       {/* Hero del campeón — solo si campeon !== null */}
       {campeon && (
-        <article className="champion-hero">
-          <div className="trophy-mark" aria-hidden="true">🏆</div>
-          <span className="champion-label">CAMPEÓN</span>
-          <PlayerAvatar nombre={campeon.nombre} fotoUrl={campeon.foto_url} size={120} />
-          <h2 className="champion-name">{campeon.nombre}</h2>
-          <p className="champion-subline">
-            Temporada {temporada_nombre}
-            {fechaFmt && <> · Cerrada el {fechaFmt}</>}
+        <article className="champion-seal" aria-label="Sello del campeón">
+          <CornerOrnament position="tl" />
+          <CornerOrnament position="tr" />
+          <CornerOrnament position="bl" />
+          <CornerOrnament position="br" />
+
+          <TrophyMark />
+
+          <div className="seal-headline seal-headline-main">
+            <span className="rule" aria-hidden="true" />
+            <span className="diamond" aria-hidden="true" />
+            <span className="seal-title">CAMPEÓN</span>
+            <span className="diamond" aria-hidden="true" />
+            <span className="rule" aria-hidden="true" />
+          </div>
+
+          <p className="seal-eyebrow">
+            Liga de Dudo{yearRoman && <> · {yearRoman}</>}
           </p>
-          <div className="champion-stats">
-            <div className="stat">
+
+          <div className="seal-portrait">
+            <LaurelSprig side="left" />
+            <span className="seal-avatar-wrap">
+              <PlayerAvatar nombre={campeon.nombre} fotoUrl={campeon.foto_url} size={120} />
+            </span>
+            <LaurelSprig side="right" />
+          </div>
+
+          <h2 className="seal-name">{campeon.nombre}</h2>
+
+          <div className="seal-headline seal-temporada">
+            <span className="diamond" aria-hidden="true" />
+            <span className="seal-temporada-text">
+              Temporada {temporada_nombre}
+            </span>
+            <span className="diamond" aria-hidden="true" />
+          </div>
+
+          {fechaFmt && (
+            <p className="seal-cierre">Cerrada el {fechaFmt}</p>
+          )}
+
+          <div className="seal-stats">
+            <div className="seal-stat">
               <div className="k">Puntos</div>
               <div className="v">{campeon.puntos}</div>
             </div>
-            <div className="stat">
+            <div className="seal-stat">
               <div className="k">Asistencias</div>
               <div className="v">{campeon.asistencias}</div>
             </div>
-            <div className="stat">
+            <div className="seal-stat">
               <div className="k">Promedio</div>
               <div className="v">{campeon.promedio.toFixed(1)}</div>
             </div>
           </div>
-          {/* Racha pill en hero — solo cuando racha >= 2 */}
+
+          {/* Racha pill — solo cuando racha >= 2 */}
           {(() => {
             const champEntry = ranking.find((r) => r.id_jugador === campeon.id)
             return champEntry && champEntry.racha >= 2 ? (
-              <NarrativeBadges entry={champEntry} variant="podium" />
+              <div className="seal-racha">
+                <NarrativeBadges entry={champEntry} variant="podium" />
+              </div>
             ) : null
           })()}
         </article>
