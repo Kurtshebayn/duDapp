@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react'
-import { getRankingNarrativo, getReuniones, getTemporadaActiva } from '../services/api'
+import {
+  getRankingNarrativo,
+  getReuniones,
+  getTemporadaActiva,
+  getUltimaCerradaRankingNarrativo,
+} from '../services/api'
 import PlayerAvatar from '../components/PlayerAvatar'
 import NarrativeBadges from '../components/NarrativeBadges'
 import PageHeader from '../components/PageHeader'
-import { parseLocalDate, formatShortDate, maxDate } from '../lib/dates'
+import { parseLocalDate, formatShortDate, formatLongDate, maxDate } from '../lib/dates'
 import {
   assignRanks,
   getPodium,
@@ -16,6 +21,11 @@ import {
 
 /**
  * Página unificada Posiciones + Estadísticas.
+ *
+ * Máquina de estados de 3 modos:
+ *   live   — temporada activa existe (comportamiento previo, sin cambios)
+ *   closed — sin activa, hay ultima cerrada → hero del campeón + tabla final
+ *   empty  — ni activa ni cerrada → empty state
  *
  * Aplica standard competition ranking (1, 1, 3, 4) — empates comparten
  * posición y la siguiente salta. Podio se muestra asimétrico solo cuando
@@ -32,9 +42,10 @@ export default function Ranking() {
       getRankingNarrativo(),
       getReuniones(),
       getTemporadaActiva(),
+      getUltimaCerradaRankingNarrativo(),
     ])
-      .then(([ranking, reuniones, temporada]) => {
-        setData({ ranking, reuniones, temporada })
+      .then(([ranking, reuniones, temporada, ultimaCerrada]) => {
+        setData({ ranking, reuniones, temporada, ultimaCerrada })
       })
       .catch(setError)
       .finally(() => setLoading(false))
@@ -42,7 +53,32 @@ export default function Ranking() {
 
   if (loading) return <p className="status">Cargando…</p>
   if (error) return <p className="status">Error al cargar los datos.</p>
-  if (!data || !data.ranking) return <p className="status">No hay temporada activa.</p>
+  if (!data) return null
+
+  // ── Mode resolver ─────────────────────────────────────────────────────────
+  const temporadaActiva = data.temporada   // null when no active season
+  const ultimaCerrada   = data.ultimaCerrada // null when no closed season
+
+  let mode
+  if (temporadaActiva) {
+    mode = 'live'
+  } else if (ultimaCerrada) {
+    mode = 'closed'
+  } else {
+    mode = 'empty'
+  }
+
+  // ── Empty mode ────────────────────────────────────────────────────────────
+  if (mode === 'empty') {
+    return <p className="status">Todavía no hay temporadas registradas.</p>
+  }
+
+  // ── Closed mode ───────────────────────────────────────────────────────────
+  if (mode === 'closed') {
+    return renderClosed(ultimaCerrada)
+  }
+
+  // ── Live mode (original behavior, untouched) ──────────────────────────────
 
   // Filtra jugadores con 0 asistencias y 0 puntos (regla de negocio)
   const filtered = (data.ranking || []).filter(
@@ -242,6 +278,115 @@ export default function Ranking() {
           </span>
         </button>
       </section>
+    </section>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Closed mode render — inline function (~80 lines JSX, sub-100 threshold)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function renderClosed(payload) {
+  const { temporada_nombre, fecha_cierre, campeon, ranking } = payload
+
+  const fechaFmt = fecha_cierre
+    ? formatLongDate(parseLocalDate(fecha_cierre))
+    : null
+
+  return (
+    <section className="ranking-page editorial-page closed-season">
+      <PageHeader
+        eyebrow="Última temporada cerrada"
+        title={
+          <>
+            El<br />
+            <span className="ital">campeón.</span>
+          </>
+        }
+        description={null}
+        meta={[]}
+      />
+
+      {/* Hero del campeón — solo si campeon !== null */}
+      {campeon && (
+        <article className="champion-hero">
+          <div className="trophy-mark" aria-hidden="true">🏆</div>
+          <span className="champion-label">CAMPEÓN</span>
+          <PlayerAvatar nombre={campeon.nombre} fotoUrl={campeon.foto_url} size={120} />
+          <h2 className="champion-name">{campeon.nombre}</h2>
+          <p className="champion-subline">
+            Temporada {temporada_nombre}
+            {fechaFmt && <> · Cerrada el {fechaFmt}</>}
+          </p>
+          <div className="champion-stats">
+            <div className="stat">
+              <div className="k">Puntos</div>
+              <div className="v">{campeon.puntos}</div>
+            </div>
+            <div className="stat">
+              <div className="k">Asistencias</div>
+              <div className="v">{campeon.asistencias}</div>
+            </div>
+            <div className="stat">
+              <div className="k">Promedio</div>
+              <div className="v">{campeon.promedio.toFixed(1)}</div>
+            </div>
+          </div>
+          {/* Racha pill en hero — solo cuando racha >= 2 */}
+          {(() => {
+            const champEntry = ranking.find((r) => r.id_jugador === campeon.id)
+            return champEntry && champEntry.racha >= 2 ? (
+              <NarrativeBadges entry={champEntry} variant="podium" />
+            ) : null
+          })()}
+        </article>
+      )}
+
+      {/* Nota de empate cuando no hay campeón designado */}
+      {!campeon && (
+        <p className="tie-note">
+          La temporada terminó en empate sin campeón designado.
+        </p>
+      )}
+
+      <div className="stitch" />
+
+      {/* Badge TEMPORADA CERRADA + título de tabla */}
+      <div className="page-section-head">
+        <h2 className="page-section-title">Tabla final.</h2>
+        <span className="eyebrow closed-badge">
+          <span className="dot" />
+          Temporada cerrada
+        </span>
+      </div>
+
+      {/* Tabla final — todos los jugadores, solo pill racha */}
+      <div className="board" role="table" aria-label="Tabla final">
+        <div className="row head" role="row">
+          <div role="columnheader">#</div>
+          <div role="columnheader">Jugador</div>
+          <div role="columnheader" className="num-cell">Puntos</div>
+          <div role="columnheader" className="num-cell col-asis">Asis.</div>
+          <div role="columnheader" className="num-cell">Promedio</div>
+        </div>
+        {ranking.map((e) => (
+          <div className="row" key={e.id_jugador} role="row">
+            <div className="pos num">{String(e.posicion).padStart(2, '0')}</div>
+            <div className="name">
+              <PlayerAvatar nombre={e.nombre} fotoUrl={e.foto_url} size={36} />
+              <div className="name-text">
+                <span className="apodo">{e.nombre}</span>
+                {/* NarrativeBadges is shape-safe: renders only racha when delta/lider absent */}
+                <NarrativeBadges entry={e} variant="table" />
+                <small>{e.asistencias} asistencias</small>
+              </div>
+            </div>
+            <div className="num-cell points">{e.puntos}</div>
+            <div className="num-cell dim col-asis">{e.asistencias}</div>
+            <div className="num-cell dim">{e.promedio.toFixed(1)}</div>
+          </div>
+        ))}
+      </div>
     </section>
   )
 }

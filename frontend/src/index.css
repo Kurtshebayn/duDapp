@@ -2261,6 +2261,121 @@ tbody td {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
+   Ranking — Closed season (champion hero + final standings)
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Hero del campeón */
+.champion-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 32px 40px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  margin-bottom: 8px;
+}
+
+.trophy-mark {
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 4px 12px rgba(176, 141, 60, 0.35));
+}
+
+.champion-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+
+.champion-name {
+  font-family: var(--font-serif);
+  font-size: clamp(36px, 8vw, 64px);
+  font-weight: 400;
+  color: var(--ink);
+  margin: 16px 0 8px;
+  line-height: 1.1;
+}
+
+.champion-subline {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+
+.champion-stats {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.champion-stats .stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.champion-stats .stat .k {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+.champion-stats .stat .v {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  color: var(--leather-deep);
+  line-height: 1;
+}
+
+/* Tie note (when campeon is null) */
+.tie-note {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--muted);
+  text-align: center;
+  padding: 24px 0;
+  margin: 0;
+}
+
+/* Closed badge in eyebrow */
+.eyebrow.closed-badge {
+  color: var(--leather);
+}
+
+/* Mobile adjustments for champion hero */
+@media (max-width: 720px) {
+  .champion-hero {
+    padding: 36px 20px 32px;
+  }
+
+  .trophy-mark {
+    font-size: 44px;
+  }
+
+  .champion-stats {
+    gap: 20px;
+  }
+
+  .champion-stats .stat .v {
+    font-size: 22px;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    Reduced motion
    ════════════════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {

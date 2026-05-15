@@ -3,11 +3,12 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Ranking from '../Ranking'
 
-// Mock the api module
+// Mock the api module — 4 endpoints (4th added for vista-ultima-temporada-cerrada)
 vi.mock('../../services/api', () => ({
   getRankingNarrativo: vi.fn(),
   getReuniones: vi.fn(() => Promise.resolve([])),
   getTemporadaActiva: vi.fn(() => Promise.resolve({ nombre: 'Temporada Test', id: 1, estado: 'activa' })),
+  getUltimaCerradaRankingNarrativo: vi.fn(() => Promise.resolve(null)),
 }))
 
 // Base entry with narrative fields
@@ -40,9 +41,13 @@ function makeRanking(overrides = []) {
   return base
 }
 
+// Helper for live-mode renders: sets up all 4 mocks
+// getUltimaCerradaRankingNarrativo defaults to null (no closed season) → live mode
 async function renderRanking(rankingData) {
-  const { getRankingNarrativo } = await import('../../services/api')
-  vi.mocked(getRankingNarrativo).mockResolvedValueOnce(rankingData)
+  const api = await import('../../services/api')
+  vi.mocked(api.getRankingNarrativo).mockResolvedValueOnce(rankingData)
+  // getTemporadaActiva already defaults to active season via vi.mock above
+  // getUltimaCerradaRankingNarrativo already defaults to null via vi.mock above
 
   render(
     <MemoryRouter>
@@ -53,6 +58,65 @@ async function renderRanking(rankingData) {
   await waitFor(() => {
     expect(screen.queryByText(/Cargando/)).not.toBeInTheDocument()
   })
+}
+
+// Helper for closed-mode renders
+async function renderRankingClosed({ ultimaCerrada }) {
+  const api = await import('../../services/api')
+  vi.mocked(api.getRankingNarrativo).mockResolvedValueOnce(null)
+  vi.mocked(api.getTemporadaActiva).mockResolvedValueOnce(null)
+  vi.mocked(api.getUltimaCerradaRankingNarrativo).mockResolvedValueOnce(ultimaCerrada)
+
+  render(
+    <MemoryRouter>
+      <Ranking />
+    </MemoryRouter>
+  )
+
+  await waitFor(() => {
+    expect(screen.queryByText(/Cargando/)).not.toBeInTheDocument()
+  })
+}
+
+// Helper for empty-mode renders
+async function renderRankingEmpty() {
+  const api = await import('../../services/api')
+  vi.mocked(api.getRankingNarrativo).mockResolvedValueOnce(null)
+  vi.mocked(api.getTemporadaActiva).mockResolvedValueOnce(null)
+  vi.mocked(api.getUltimaCerradaRankingNarrativo).mockResolvedValueOnce(null)
+
+  render(
+    <MemoryRouter>
+      <Ranking />
+    </MemoryRouter>
+  )
+
+  await waitFor(() => {
+    expect(screen.queryByText(/Cargando/)).not.toBeInTheDocument()
+  })
+}
+
+// Minimal closed-mode payload factory
+function makeUltimaCerrada(overrides = {}) {
+  return {
+    temporada_id: 99,
+    temporada_nombre: 'Copa Invierno',
+    fecha_cierre: '2026-05-10',
+    campeon: {
+      id: 1,
+      nombre: 'Ana',
+      foto_url: null,
+      puntos: 90,
+      asistencias: 6,
+      promedio: 15.0,
+    },
+    ranking: [
+      { id_jugador: 1, nombre: 'Ana',    foto_url: null, puntos: 90, asistencias: 6, promedio: 15.0, posicion: 1, racha: 3 },
+      { id_jugador: 2, nombre: 'Bruno',  foto_url: null, puntos: 84, asistencias: 6, promedio: 14.0, posicion: 2, racha: 0 },
+      { id_jugador: 3, nombre: 'Carlos', foto_url: null, puntos: 78, asistencias: 6, promedio: 13.0, posicion: 3, racha: 0 },
+    ],
+    ...overrides,
+  }
 }
 
 describe('Ranking.jsx — API wiring', () => {
@@ -260,5 +324,111 @@ describe('Ranking.jsx — assignRanks pipeline and tonal classes', () => {
     expect(subePill).not.toHaveClass('narrative-pill--regression')
     expect(caePill).toHaveClass('narrative-pill--regression')
     expect(caePill).not.toHaveClass('narrative-pill--positive')
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Closed mode tests (REQ-4, REQ-5, REQ-6)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Ranking.jsx — Closed mode (no active season, closed season exists)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('16. closed mode: renders CAMPEÓN label and champion name', async () => {
+    await renderRankingClosed({ ultimaCerrada: makeUltimaCerrada() })
+    expect(screen.getByText('CAMPEÓN')).toBeInTheDocument()
+    expect(screen.getAllByText('Ana').length).toBeGreaterThan(0)
+  })
+
+  it('17. closed mode: renders TEMPORADA CERRADA badge', async () => {
+    await renderRankingClosed({ ultimaCerrada: makeUltimaCerrada() })
+    // The .closed-badge eyebrow renders "Temporada cerrada" (case-insensitive match)
+    // Multiple elements may contain the text — at least one must exist
+    expect(screen.getAllByText(/Temporada cerrada/i).length).toBeGreaterThan(0)
+  })
+
+  it('18. closed mode: renders champion stats (puntos, asistencias, promedio)', async () => {
+    await renderRankingClosed({ ultimaCerrada: makeUltimaCerrada() })
+    // champion-stats section has Puntos/Asistencias/Promedio labels + values
+    const heroSection = document.querySelector('.champion-hero')
+    expect(heroSection).not.toBeNull()
+    expect(heroSection.textContent).toContain('90')
+    expect(heroSection.textContent).toContain('15.0')
+  })
+
+  it('19. closed mode: fecha_cierre present → subline includes "Cerrada el"', async () => {
+    await renderRankingClosed({ ultimaCerrada: makeUltimaCerrada({ fecha_cierre: '2026-05-10' }) })
+    expect(screen.getByText(/Cerrada el/)).toBeInTheDocument()
+  })
+
+  it('20. closed mode: fecha_cierre null → subline does NOT include "Cerrada el"', async () => {
+    await renderRankingClosed({ ultimaCerrada: makeUltimaCerrada({ fecha_cierre: null }) })
+    expect(screen.queryByText(/Cerrada el/)).not.toBeInTheDocument()
+    // Temporada name still visible
+    expect(screen.getByText(/Copa Invierno/)).toBeInTheDocument()
+  })
+
+  it('21. closed mode: campeon null (empate) → no CAMPEÓN label, tie-note rendered', async () => {
+    await renderRankingClosed({
+      ultimaCerrada: makeUltimaCerrada({ campeon: null }),
+    })
+    expect(screen.queryByText('CAMPEÓN')).not.toBeInTheDocument()
+    expect(screen.getByText(/empate/i)).toBeInTheDocument()
+  })
+
+  it('22. closed mode: ranking table renders all players', async () => {
+    await renderRankingClosed({ ultimaCerrada: makeUltimaCerrada() })
+    expect(screen.getAllByText('Bruno').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Carlos').length).toBeGreaterThan(0)
+  })
+
+  it('23. closed mode: racha pill visible for champion (racha >= 2)', async () => {
+    await renderRankingClosed({ ultimaCerrada: makeUltimaCerrada() })
+    // Ana has racha: 3 in makeUltimaCerrada
+    expect(screen.getAllByText('racha de 3').length).toBeGreaterThan(0)
+  })
+
+  it('24. closed mode: no delta pills (sube/cae) in table — closed entries lack those fields', async () => {
+    await renderRankingClosed({ ultimaCerrada: makeUltimaCerrada() })
+    expect(screen.queryByText(/^sube/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^cae/)).not.toBeInTheDocument()
+  })
+
+  it('25. closed mode: no líder desde pills — closed entries lack that field', async () => {
+    await renderRankingClosed({ ultimaCerrada: makeUltimaCerrada() })
+    expect(screen.queryByText(/^líder desde/)).not.toBeInTheDocument()
+  })
+
+  it('26. live mode regression: with active season, closed mode hero NOT rendered', async () => {
+    const api = await import('../../services/api')
+    vi.mocked(api.getRankingNarrativo).mockResolvedValueOnce(makeRanking())
+    // getTemporadaActiva defaults to active (from vi.mock top)
+    // getUltimaCerradaRankingNarrativo defaults to null (from vi.mock top)
+    render(<MemoryRouter><Ranking /></MemoryRouter>)
+    await waitFor(() => expect(screen.queryByText(/Cargando/)).not.toBeInTheDocument())
+    expect(screen.queryByText('CAMPEÓN')).not.toBeInTheDocument()
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Empty mode tests (REQ-4)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Ranking.jsx — Empty mode (no active, no closed seasons)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('27. empty mode: renders "Todavía no hay temporadas registradas" copy', async () => {
+    await renderRankingEmpty()
+    expect(screen.getByText(/Todavía no hay temporadas registradas/)).toBeInTheDocument()
+  })
+
+  it('28. empty mode: no CAMPEÓN label, no table visible', async () => {
+    await renderRankingEmpty()
+    expect(screen.queryByText('CAMPEÓN')).not.toBeInTheDocument()
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 })
