@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Reuniones from '../Reuniones'
 
@@ -18,6 +18,58 @@ function makeReunion(overrides = {}) {
     ...overrides,
   }
 }
+
+describe('Reuniones.jsx — Empty state (no active season)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('4. temporada null → editorial empty state rendered, no round rows', async () => {
+    const { getReuniones, getTemporadaActiva } = await import('../../services/api')
+    vi.mocked(getTemporadaActiva).mockResolvedValueOnce(null)
+    vi.mocked(getReuniones).mockResolvedValueOnce(null)
+
+    render(
+      <MemoryRouter>
+        <Reuniones />
+      </MemoryRouter>
+    )
+
+    // Wait for loading to finish
+    await waitFor(() => {
+      expect(screen.queryByText(/Cargando/)).not.toBeInTheDocument()
+    })
+
+    // Editorial empty state must be visible
+    expect(screen.getByText(/No hay/)).toBeInTheDocument()
+    expect(screen.getByText(/temporada activa/)).toBeInTheDocument()
+    expect(screen.getByText(/Cuando el admin/)).toBeInTheDocument()
+
+    // No round rows
+    expect(document.querySelector('.board-reuniones')).toBeNull()
+  })
+
+  it('5. active season present → existing round-listing behavior unchanged', async () => {
+    const { getReuniones, getTemporadaActiva } = await import('../../services/api')
+    vi.mocked(getTemporadaActiva).mockResolvedValueOnce({ nombre: 'Temporada Test', id: 1, estado: 'activa' })
+    vi.mocked(getReuniones).mockResolvedValueOnce([
+      makeReunion({ id: 1, numero_jornada: 1, ganador: null }),
+    ])
+
+    render(
+      <MemoryRouter>
+        <Reuniones />
+      </MemoryRouter>
+    )
+
+    await screen.findByText(/Todas las jornadas/)
+
+    // Normal listing renders
+    expect(document.querySelector('.board-reuniones')).not.toBeNull()
+    // No empty state copy
+    expect(screen.queryByText(/Cuando el admin/)).not.toBeInTheDocument()
+  })
+})
 
 describe('Reuniones.jsx — Winner avatar', () => {
   beforeEach(() => {

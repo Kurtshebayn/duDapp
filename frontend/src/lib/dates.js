@@ -78,3 +78,27 @@ export function maxDate(dates) {
     return !max || d > max ? d : max
   }, null)
 }
+
+/**
+ * Convierte un entero (1-3999) a numeral romano.
+ * Útil para fechas con vibe diploma / sello editorial.
+ * Devuelve string vacío si el input es inválido.
+ */
+export function toRoman(num) {
+  const n = Number(num)
+  if (!Number.isInteger(n) || n < 1 || n > 3999) return ''
+  const map = [
+    [1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'],
+    [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'],
+    [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I'],
+  ]
+  let result = ''
+  let rest = n
+  for (const [val, sym] of map) {
+    while (rest >= val) {
+      result += sym
+      rest -= val
+    }
+  }
+  return result
+}

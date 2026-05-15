@@ -38,6 +38,7 @@ export const getRankingNarrativo = () => apiFetch('/temporadas/activa/ranking-na
 export const getReuniones = () => apiFetch('/temporadas/activa/reuniones')
 export const getResultadosReunion = (id) => apiFetch(`/reuniones/${id}`)
 export const getTemporadaActiva = () => apiFetch('/temporadas/activa')
+export const getUltimaCerradaRankingNarrativo = () => apiFetch('/temporadas/ultima-cerrada/ranking-narrativo')
 export const getJugadores = () => apiFetch('/jugadores')
 export const getHistoricoResumen = () => apiFetch('/historico/resumen')
 export const getHeadToHead = (jugadorId) => apiFetch(`/historico/head-to-head/${jugadorId}`)
