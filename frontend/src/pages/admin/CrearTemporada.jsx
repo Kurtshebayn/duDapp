@@ -163,9 +163,12 @@ export default function CrearTemporada() {
                 <div key={j.id} className="checkbox-item-wrap">
                   <label
                     className={`checkbox-item${seleccionados.has(j.id) ? ' selected' : ''}`}
-                    onClick={() => toggleSeleccionado(j.id)}
                   >
-                    <input type="checkbox" readOnly checked={seleccionados.has(j.id)} />
+                    <input
+                      type="checkbox"
+                      checked={seleccionados.has(j.id)}
+                      onChange={() => toggleSeleccionado(j.id)}
+                    />
                     <PlayerAvatar nombre={j.nombre} fotoUrl={j.foto_url} size={22} />
                     {j.nombre}
                   </label>
