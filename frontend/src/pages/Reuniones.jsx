@@ -27,7 +27,23 @@ export default function Reuniones() {
 
   if (loading) return <p className="status">Cargando…</p>
   if (error) return <p className="status">Error al cargar los datos.</p>
-  if (!data || !data.reuniones) return <p className="status">No hay temporada activa.</p>
+  if (!data || !data.reuniones) {
+    return (
+      <section className="editorial-page reuniones-page empty-state">
+        <PageHeader
+          eyebrow="Liga"
+          title={
+            <>
+              No hay<br />
+              <span className="ital">temporada activa.</span>
+            </>
+          }
+          description="Cuando el admin cree una nueva, vas a ver las jornadas acá."
+          meta={[]}
+        />
+      </section>
+    )
+  }
   if (data.reuniones.length === 0) {
     return <p className="status">Aún no hay reuniones registradas.</p>
   }

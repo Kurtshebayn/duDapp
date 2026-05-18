@@ -93,6 +93,37 @@ describe('NarrativeBadges — variant="podium"', () => {
   })
 })
 
+describe('NarrativeBadges — shape safety (missing delta/lider fields)', () => {
+  it('17. entry with only racha: 3 (no delta, no lider) → "racha de 3" rendered, no crash', () => {
+    const { container } = renderBadges({ racha: 3 })
+    expect(screen.getByText('racha de 3')).toBeInTheDocument()
+    const pills = container.querySelectorAll('.narrative-pill')
+    expect(pills).toHaveLength(1)
+  })
+
+  it('18. entry with only racha: 1 (no delta, no lider) → no badge (racha < 2 threshold)', () => {
+    const { container } = renderBadges({ racha: 1 })
+    expect(screen.queryByText(/^racha de/)).not.toBeInTheDocument()
+    expect(container.firstChild).toBeNull()
+  })
+
+  it('19. entry with only racha: 0 (all fields absent) → no badge, no crash', () => {
+    const { container } = renderBadges({ racha: 0 })
+    expect(container.firstChild).toBeNull()
+  })
+
+  it('20. entry with undefined delta_posicion → no sube/cae badge, no crash', () => {
+    renderBadges({ racha: 0, lider_desde_jornada: null })
+    expect(screen.queryByText(/^sube/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^cae/)).not.toBeInTheDocument()
+  })
+
+  it('21. entry with undefined lider_desde_jornada → no líder badge, no crash', () => {
+    renderBadges({ racha: 0, delta_posicion: 0 })
+    expect(screen.queryByText(/^líder desde/)).not.toBeInTheDocument()
+  })
+})
+
 describe('NarrativeBadges — variant="table" (badge cap)', () => {
   it('14. Table: lider:2, racha:3, delta:1 → exactly 2 badges: líder + racha; sube 1 NOT present', () => {
     const { container } = render(

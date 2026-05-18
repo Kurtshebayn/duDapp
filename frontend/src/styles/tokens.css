@@ -28,6 +28,7 @@
 
   /* ─── Podio (metales envejecidos) ──────────────────────────────────── */
   --gold: #b08d3c;            /* oro envejecido — 1° puesto */
+  --gold-glow: rgba(176, 141, 60, 0.25); /* halo dorado para drop-shadows */
   --pewter: #9a9388;          /* peltre — 2° puesto */
   --copper: #8b5a2b;          /* cobre — 3° puesto */
 
