@@ -32,5 +32,9 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciales inválidas",
         )
-    token = create_access_token({"sub": str(user.id)})
+    token = create_access_token({
+        "sub": str(user.id),
+        "email": user.email,
+        "name": user.nombre,
+    })
     return TokenResponse(access_token=token)

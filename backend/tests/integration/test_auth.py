@@ -9,6 +9,21 @@ def test_login_exitoso_con_email(client, admin_user):
     assert data["token_type"] == "bearer"
 
 
+def test_jwt_incluye_email_y_nombre(client, admin_user):
+    from app.auth.jwt import decode_token
+
+    response = client.post("/auth/login", json={
+        "identificador": "admin@dudo.com",
+        "password": "admin123",
+    })
+    assert response.status_code == 200
+    token = response.json()["access_token"]
+    claims = decode_token(token)
+    assert claims["sub"] == str(admin_user.id)
+    assert claims["email"] == admin_user.email
+    assert claims["name"] == admin_user.nombre
+
+
 def test_login_exitoso_con_nombre(client, admin_user):
     response = client.post("/auth/login", json={
         "identificador": "Admin",
