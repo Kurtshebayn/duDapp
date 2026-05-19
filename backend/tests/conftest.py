@@ -1,3 +1,8 @@
+import os
+
+os.environ.setdefault("JWT_SECRET", "pytest-ci-secret-key-do-not-use-in-prod-32ch!")
+os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
+
 import bcrypt
 import pytest
 from fastapi.testclient import TestClient
@@ -52,3 +57,8 @@ def admin_user(db):
     db.commit()
     db.refresh(user)
     return user
+
+
+@pytest.fixture(autouse=True, scope="session")
+def disable_rate_limit():
+    pass  # PR2-T1 will wire this to limiter.enabled = False
