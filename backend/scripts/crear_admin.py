@@ -29,12 +29,26 @@ def main() -> None:
     nombre = os.getenv("ADMIN_NOMBRE", "Admin")
     password = os.getenv("ADMIN_PASSWORD", "")
 
-    if not password:
-        print("ERROR: Definí la variable de entorno ADMIN_PASSWORD antes de correr este script.")
-        sys.exit(1)
-
     # Crea las tablas si no existen (útil en desarrollo)
     Base.metadata.create_all(bind=engine)
+
+    if not password:
+        # No password provided — check if admin already exists.
+        # Exit 0 (graceful no-op) if admin exists: enables post-bootstrap deploys
+        # where ADMIN_PASSWORD has been removed from Render env vars.
+        # Exit 1 if no admin exists: genuine misconfig that needs operator attention.
+        db = SessionLocal()
+        try:
+            usuario = db.query(Usuario).filter(Usuario.email == email).first()
+        finally:
+            db.close()
+
+        if usuario:
+            print(f"OK: Admin already exists ({email}), skipping bootstrap.")
+            sys.exit(0)
+        else:
+            print("ERROR: Definí la variable de entorno ADMIN_PASSWORD antes de correr este script.")
+            sys.exit(1)
 
     db = SessionLocal()
     try:
