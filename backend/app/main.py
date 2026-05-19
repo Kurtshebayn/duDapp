@@ -1,5 +1,7 @@
+import os
 from contextlib import asynccontextmanager
 
+import cloudinary
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -12,7 +14,17 @@ from app.security.rate_limit import limiter
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Placeholder for future startup logic (e.g., Cloudinary config in PR3).
+    # Configure Cloudinary SDK once at startup (R-10 / AD-10).
+    # Guard: only configure when all three vars are present (test env won't have them).
+    _cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
+    _api_key = os.getenv("CLOUDINARY_API_KEY")
+    _api_secret = os.getenv("CLOUDINARY_API_SECRET")
+    if _cloud_name and _api_key and _api_secret:
+        cloudinary.config(
+            cloud_name=_cloud_name,
+            api_key=_api_key,
+            api_secret=_api_secret,
+        )
     yield
 
 
@@ -40,8 +52,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 app.include_router(auth.router)
