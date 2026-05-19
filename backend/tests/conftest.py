@@ -61,4 +61,33 @@ def admin_user(db):
 
 @pytest.fixture(autouse=True, scope="session")
 def disable_rate_limit():
-    pass  # PR2-T1 will wire this to limiter.enabled = False
+    """Disable the slowapi rate limiter for all tests by default.
+
+    This prevents rate-limit state bleed between tests and avoids flakiness
+    from tests that call /auth/login repeatedly. Tests that explicitly want to
+    exercise 429 behavior must use the enable_rate_limit fixture instead.
+    """
+    from app.security.rate_limit import limiter
+
+    limiter.enabled = False
+    yield
+    limiter.enabled = True
+
+
+@pytest.fixture
+def enable_rate_limit():
+    """Opt-in fixture for tests that need the rate limiter active.
+
+    Enables the limiter and resets its in-memory storage at both entry and exit
+    so that test runs don't bleed into each other. The limiter is disabled again
+    after the test completes.
+    """
+    from app.security.rate_limit import limiter
+
+    limiter.reset()
+    limiter.enabled = True
+
+    yield
+
+    limiter.enabled = False
+    limiter.reset()  # clean up so the next test starts fresh

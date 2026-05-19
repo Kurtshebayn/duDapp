@@ -1,51 +1,34 @@
-import os
 from contextlib import asynccontextmanager
 
-import bcrypt
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
 
 from app.config import CORS_ORIGINS
-from app.database import Base, SessionLocal, engine
 from app.routers import auth, historico, jugadores, reuniones, temporadas
-
-
-def _setup_admin() -> None:
-    """Crea o actualiza el admin si ADMIN_PASSWORD está definida en el entorno."""
-    password = os.getenv("ADMIN_PASSWORD")
-    if not password:
-        return
-
-    from app.models.usuario import Usuario
-
-    email = os.getenv("ADMIN_EMAIL", "admin@dudo.com")
-    nombre = os.getenv("ADMIN_NOMBRE", "Admin")
-    password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-
-    Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
-    try:
-        usuario = db.query(Usuario).filter(Usuario.email == email).first()
-        if usuario:
-            usuario.password_hash = password_hash
-            usuario.nombre = nombre
-            db.commit()
-            print(f"[setup_admin] Contrasena actualizada para {email}")
-        else:
-            db.add(Usuario(email=email, nombre=nombre, password_hash=password_hash))
-            db.commit()
-            print(f"[setup_admin] Admin creado: {email}")
-    finally:
-        db.close()
+from app.security.rate_limit import limiter
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    _setup_admin()
+    # Placeholder for future startup logic (e.g., Cloudinary config in PR3).
     yield
 
 
 app = FastAPI(title="duDapp API", lifespan=lifespan)
+
+# Wire slowapi limiter
+app.state.limiter = limiter
+
+
+@app.exception_handler(RateLimitExceeded)
+async def _rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    return JSONResponse(
+        status_code=429,
+        content={"detail": f"Rate limit exceeded: {exc.detail}"},
+    )
+
 
 app.add_middleware(
     CORSMiddleware,
