@@ -6,6 +6,8 @@ import os
 import subprocess
 import sys
 
+import pytest
+
 
 def _run_import(env_overrides: dict) -> subprocess.CompletedProcess:
     """Run `import app.config` in a subprocess with given env overrides."""
@@ -31,10 +33,20 @@ def test_jwt_secret_too_short_raises():
     assert result.returncode != 0
 
 
-def test_jwt_secret_forbidden_substring_raises():
-    """JWT_SECRET containing a forbidden substring must cause non-zero exit."""
-    # "dev-secret" is in the forbidden list
-    result = _run_import({"JWT_SECRET": "dev-secret-key-that-is-long-enough-abc"})
+@pytest.mark.parametrize(
+    "forbidden_value",
+    [
+        "dev-secret-key-padded-out-to-thirty-two-chars",
+        "changeme-key-padded-out-to-thirty-two-chars-ok",
+        "change-in-production-padded-to-thirty-two-ok!!",
+        "example-key-padded-out-to-thirty-two-chars-ok!",
+        "placeholder-key-padded-out-to-thirty-two-chars",
+    ],
+    ids=["dev-secret", "changeme", "change-in-production", "example", "placeholder"],
+)
+def test_jwt_secret_forbidden_substring_raises(forbidden_value: str):
+    """Each forbidden substring in JWT_SECRET must cause non-zero exit."""
+    result = _run_import({"JWT_SECRET": forbidden_value})
     assert result.returncode != 0
 
 

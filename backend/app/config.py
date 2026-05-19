@@ -17,23 +17,23 @@ _FORBIDDEN_SUBSTRINGS = [
 
 
 def _require_jwt_secret() -> str:
-    """Validate and return JWT_SECRET, raising RuntimeError on misconfig."""
+    """Validate and return JWT_SECRET, raising ValueError on misconfig."""
     value = os.getenv("JWT_SECRET", "").strip()
     if not value:
-        raise RuntimeError(
+        raise ValueError(
             "JWT_SECRET env var is required, must be at least 32 chars, "
             "and must not contain insecure substrings. "
             "Generate with: openssl rand -hex 32"
         )
     if len(value) < 32:
-        raise RuntimeError(
+        raise ValueError(
             "JWT_SECRET env var is required, must be at least 32 chars, "
             "and must not contain insecure substrings. "
             "Generate with: openssl rand -hex 32"
         )
     for forbidden in _FORBIDDEN_SUBSTRINGS:
         if forbidden in value:
-            raise RuntimeError(
+            raise ValueError(
                 "JWT_SECRET env var is required, must be at least 32 chars, "
                 "and must not contain insecure substrings. "
                 "Generate with: openssl rand -hex 32"
