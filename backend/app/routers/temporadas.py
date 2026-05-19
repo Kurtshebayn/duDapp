@@ -24,6 +24,8 @@ from app.schemas.temporada import (
     TemporadaCreate,
     TemporadaResponse,
 )
+from app.security.audit import log_import_temporada, log_temporada_cerrada
+from app.utils.uploads import ALLOWED_CSV_MIMES, MAX_CSV_BYTES, validate_upload
 from app.services import consultas as consultas_service
 from app.services import import_temporada as import_service
 from app.services import reunion as reunion_service
@@ -49,9 +51,10 @@ def crear_temporada(
 def cerrar_temporada(
     temporada_id: int,
     db: Session = Depends(get_db),
-    _: Usuario = Depends(get_current_user),
+    current_user: Usuario = Depends(get_current_user),
 ):
     temporada, tie_detected, tied_players = temporada_service.cerrar_temporada(db, temporada_id)
+    log_temporada_cerrada(user_id=current_user.id, temporada_id=temporada_id)
     # Build response manually so we can:
     # - always include campeon_id: null (spec REQ-5)
     # - omit tied_players entirely when None (spec REQ-6 / D6)
@@ -127,15 +130,21 @@ def importar_temporada(
     Returns HTTP 201 with the created season and import summary counts.
     Raises 409 on duplicate name, 422 on any validation failure.
     """
-    archivo_bytes = archivo.file.read()
-    result = import_service.importar_temporada(
-        db=db,
-        nombre=nombre,
-        fecha_inicio=fecha_inicio,
-        archivo_bytes=archivo_bytes,
-        campeon_nombre=campeon_nombre,
-        usuario_id=user.id,
-    )
+    # Validate size and Content-Type BEFORE parsing the CSV (R-7 / AD-5).
+    archivo_bytes = validate_upload(archivo, max_bytes=MAX_CSV_BYTES, allowed_mimes=ALLOWED_CSV_MIMES)
+    try:
+        result = import_service.importar_temporada(
+            db=db,
+            nombre=nombre,
+            fecha_inicio=fecha_inicio,
+            archivo_bytes=archivo_bytes,
+            campeon_nombre=campeon_nombre,
+            usuario_id=user.id,
+        )
+    except Exception:
+        log_import_temporada(user_id=user.id, nombre=nombre, status="failed")
+        raise
+    log_import_temporada(user_id=user.id, nombre=nombre, status="success")
     # Build the response dict combining Temporada fields + resumen_import
     return {
         "id": result.temporada.id,
