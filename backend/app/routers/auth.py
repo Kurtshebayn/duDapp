@@ -6,6 +6,7 @@ from app.auth.jwt import create_access_token
 from app.database import get_db
 from app.models.usuario import Usuario
 from app.schemas.auth import LoginRequest, TokenResponse
+from app.security.audit import log_failed_login, log_successful_login
 from app.security.rate_limit import limiter
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -42,11 +43,15 @@ def login(request: Request, body: LoginRequest, db: Session = Depends(get_db)):
     password_ok = verify_password(body.password, hashed)
 
     if not user or not password_ok:
+        client_ip = request.client.host if request.client else "unknown"
+        log_failed_login(body.identificador, client_ip)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciales inválidas",
         )
 
+    client_ip = request.client.host if request.client else "unknown"
+    log_successful_login(user.id, client_ip)
     token = create_access_token({
         "sub": str(user.id),
         "email": user.email,
