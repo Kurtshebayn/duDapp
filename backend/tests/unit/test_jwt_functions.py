@@ -28,7 +28,10 @@ def test_decode_round_trip():
 def test_tampered_token_raises():
     """A token with a tampered signature must raise an exception on decode."""
     token = create_access_token({"sub": "1"})
-    # Tamper the last character of the signature
-    tampered = token[:-1] + ("A" if token[-1] != "A" else "B")
+    # JWT structure: header.payload.signature — tamper a char in the middle of the signature
+    header, payload_b64, sig = token.split(".")
+    mid = len(sig) // 2
+    tampered_sig = sig[:mid] + ("A" if sig[mid] != "A" else "B") + sig[mid + 1 :]
+    tampered = header + "." + payload_b64 + "." + tampered_sig
     with pytest.raises(Exception):
         decode_token(tampered)
