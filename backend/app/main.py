@@ -16,7 +16,13 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="duDapp API", lifespan=lifespan)
+app = FastAPI(
+    title="duDapp API",
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+    lifespan=lifespan,
+)
 
 # Wire slowapi limiter
 app.state.limiter = limiter
