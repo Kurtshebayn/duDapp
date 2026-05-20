@@ -43,21 +43,16 @@ def _require_jwt_secret() -> str:
 
 SECRET_KEY: str = _require_jwt_secret()
 
-_TEST_SENTINEL = "pytest-ci-secret-key-do-not-use-in-prod-32ch!"
-
 
 def _parse_cors_origins() -> list[str]:
-    """Parse CORS_ORIGINS env var, stripping whitespace.
+    """Parse CORS_ORIGINS env var into a stripped list of allowed origins.
 
-    Raises ValueError if the result is empty and we are NOT in a test environment
-    (identified by the JWT_SECRET test sentinel). In test env, falls back to
-    localhost for convenience.
+    Raises ValueError if the result is empty. CORS_ORIGINS is required in every
+    environment; the test suite sets it in conftest.py before this module imports.
     """
     raw = os.getenv("CORS_ORIGINS", "")
     origins = [o.strip() for o in raw.split(",") if o.strip()]
     if not origins:
-        if os.getenv("JWT_SECRET", "") == _TEST_SENTINEL:
-            return ["http://localhost:5173"]
         raise ValueError(
             "CORS_ORIGINS env var is required (comma-separated list of allowed origins). "
             "Example: https://yourapp.vercel.app"
