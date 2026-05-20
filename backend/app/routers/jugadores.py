@@ -1,3 +1,4 @@
+import io
 import os
 
 import cloudinary
@@ -11,6 +12,7 @@ from app.models.jugador import Jugador
 from app.models.usuario import Usuario
 from app.schemas.jugador import JugadorCreate, JugadorResponse
 from app.services import jugador as jugador_service
+from app.utils.uploads import ALLOWED_PHOTO_MIMES, MAX_PHOTO_BYTES, validate_upload
 
 router = APIRouter(prefix="/jugadores", tags=["jugadores"])
 
@@ -47,20 +49,19 @@ def subir_foto(
     if jugador is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Jugador no encontrado")
 
+    # Validate size and Content-Type BEFORE touching Cloudinary (R-7 / AD-5).
+    foto_bytes = validate_upload(foto, max_bytes=MAX_PHOTO_BYTES, allowed_mimes=ALLOWED_PHOTO_MIMES)
+
     if not _cloudinary_configured():
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Cloudinary no está configurado en el servidor",
         )
 
-    cloudinary.config(
-        cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-        api_key=os.getenv("CLOUDINARY_API_KEY"),
-        api_secret=os.getenv("CLOUDINARY_API_SECRET"),
-    )
-
+    # cloudinary.config() is called once at lifespan startup (app/main.py).
+    # No per-request reconfiguration needed (R-10 / AD-10).
     result = cloudinary.uploader.upload(
-        foto.file,
+        io.BytesIO(foto_bytes),
         folder="dudapp/jugadores",
         public_id=f"jugador_{id}",
         overwrite=True,
