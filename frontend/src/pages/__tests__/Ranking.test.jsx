@@ -327,6 +327,35 @@ describe('Ranking.jsx — assignRanks pipeline and tonal classes', () => {
   })
 })
 
+describe('Ranking.jsx — Eyebrow del podio (empate al tope vs empate debajo)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('15b. líder único + empate por el 2º → eyebrow "Top 3 · Promedios", NO "Empate · Top"', async () => {
+    // Kevin líder claro (117); Shebi y Mauri empatan en 114 por el 2º puesto
+    const data = [
+      makeEntry({ id_jugador: 1, nombre: 'Kevin', puntos: 117, asistencias: 10 }),
+      makeEntry({ id_jugador: 2, nombre: 'Shebi', puntos: 114, asistencias: 11 }),
+      makeEntry({ id_jugador: 3, nombre: 'Mauri', puntos: 114, asistencias: 10 }),
+    ]
+    await renderRanking(data)
+    expect(screen.getByText('Top 3 · Promedios')).toBeInTheDocument()
+    expect(screen.queryByText('Empate · Top con promedios')).not.toBeInTheDocument()
+  })
+
+  it('15c. empate genuino por el 1º → eyebrow "Empate · Top con promedios"', async () => {
+    const data = [
+      makeEntry({ id_jugador: 1, nombre: 'Ana', puntos: 120, asistencias: 10 }),
+      makeEntry({ id_jugador: 2, nombre: 'Bruno', puntos: 120, asistencias: 10 }),
+      makeEntry({ id_jugador: 3, nombre: 'Carlos', puntos: 100, asistencias: 10 }),
+    ]
+    await renderRanking(data)
+    expect(screen.getByText('Empate · Top con promedios')).toBeInTheDocument()
+    expect(screen.queryByText('Top 3 · Promedios')).not.toBeInTheDocument()
+  })
+})
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Closed mode tests (REQ-4, REQ-5, REQ-6)
 // ─────────────────────────────────────────────────────────────────────────────

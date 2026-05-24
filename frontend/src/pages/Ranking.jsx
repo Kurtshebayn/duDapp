@@ -167,7 +167,7 @@ export default function Ranking() {
             <h2 className="page-section-title">El podio.</h2>
             <span className="eyebrow">
               <span className="dot" />
-              {asymmetric ? 'Top 3 · Promedios' : 'Empate · Top con promedios'}
+              {leaders > 1 ? 'Empate · Top con promedios' : 'Top 3 · Promedios'}
             </span>
           </div>
 
