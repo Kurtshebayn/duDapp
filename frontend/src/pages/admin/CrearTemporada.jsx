@@ -89,7 +89,7 @@ export default function CrearTemporada() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (seleccionados.size + nuevosNombres.length === 0) {
-      setError('Agregá al menos un jugador.')
+      setError('Agrega al menos un jugador.')
       return
     }
     setError(null)
@@ -121,8 +121,8 @@ export default function CrearTemporada() {
 
       <PageHeader
         eyebrow="Panel admin · Nueva temporada"
-        title={<>Empezá una<br /><span className="ital">temporada.</span></>}
-        description="Definí el nombre, la fecha de inicio y la lista de jugadores que van a competir. Podés sumar jugadores nuevos o reusar los del catálogo."
+        title={<>Empieza una<br /><span className="ital">temporada.</span></>}
+        description="Define el nombre, la fecha de inicio y la lista de jugadores que van a competir. Puedes sumar jugadores nuevos o reusar los del catálogo."
       />
 
       <div className="stitch" />

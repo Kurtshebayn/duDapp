@@ -41,6 +41,9 @@ participants in that meeting (6 players -> 6, 5, 4, 3, 2, 1).
   Also fix stale "15 al primero" copy in `GestionReunion.jsx:112` to reflect the season mode.
   Reopens review finding R3-por-asistentes-gap-positions (previously dismissed incorrectly).
 
+- [x] T5 Replace Rioplatense voseo with neutral Spanish (tú) in all user-facing text: frontend UI copy, backend script messages, live docs, README.es.md (route: delegated writer — ~12 files, mechanical). User request 2026-10-05, same branch before push. Historical archives (openspec/odd change records) left as-is.
+  Evidence: 50 replacements in 12 files; pytest 372 passed, vitest 104 passed, vite build ok; final voseo grep clean (only false positives: está/así/qué/acá…).
+
 ## Acceptance criteria
 - New season created with `por_asistentes`: meeting with 6 positions stores 6,5,4,3,2,1.
 - Season created without mode: behaves exactly as today (15,14,...).

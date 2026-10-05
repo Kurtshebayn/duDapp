@@ -66,7 +66,7 @@ export default function GestionReunion({ modo }) {
 
   async function handleGuardar() {
     if (posiciones.length === 0) {
-      setError('Registrá al menos una posición.')
+      setError('Registra al menos una posición.')
       return
     }
     setError(null)
@@ -114,8 +114,8 @@ export default function GestionReunion({ modo }) {
         }
         description={
           isEdit
-            ? 'Reordená posiciones, cambiá fecha o sumá invitados. Los puntos se recalculan automáticamente al guardar.'
-            : `Asigná posiciones arrastrando jugadores. ${HINT_PUNTOS[temporada.modo_puntaje] ?? HINT_PUNTOS.fijo_15}`
+            ? 'Reordena posiciones, cambia fecha o suma invitados. Los puntos se recalculan automáticamente al guardar.'
+            : `Asigna posiciones arrastrando jugadores. ${HINT_PUNTOS[temporada.modo_puntaje] ?? HINT_PUNTOS.fijo_15}`
         }
       />
 

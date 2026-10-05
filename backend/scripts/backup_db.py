@@ -25,7 +25,7 @@ from urllib.parse import urlparse
 def main() -> None:
     database_url = os.getenv("DATABASE_URL", "")
     if not database_url:
-        print("ERROR: Definí la variable de entorno DATABASE_URL.")
+        print("ERROR: Define la variable de entorno DATABASE_URL.")
         sys.exit(1)
 
     parsed = urlparse(database_url)

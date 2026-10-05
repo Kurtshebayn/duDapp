@@ -50,7 +50,7 @@ export default function Login() {
         </h1>
 
         <p className="login-sub">
-          Ingresá con tus credenciales para registrar reuniones y administrar la liga.
+          Ingresa con tus credenciales para registrar reuniones y administrar la liga.
         </p>
 
         {error && <div className="alert alert-error login-alert">{error}</div>}

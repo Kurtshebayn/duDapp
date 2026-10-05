@@ -47,7 +47,7 @@ def main() -> None:
             print(f"OK: Admin already exists ({email}), skipping bootstrap.")
             sys.exit(0)
         else:
-            print("ERROR: Definí la variable de entorno ADMIN_PASSWORD antes de correr este script.")
+            print("ERROR: Define la variable de entorno ADMIN_PASSWORD antes de correr este script.")
             sys.exit(1)
 
     db = SessionLocal()
