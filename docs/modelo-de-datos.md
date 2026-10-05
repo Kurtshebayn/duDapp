@@ -22,7 +22,7 @@ Representa una sesión de juego semanal dentro de una temporada. Atributos: id, 
 
 ## Entidad: Posición
 
-Representa el resultado de un participante en una reunión específica. Atributos: id, id_reunión, id_jugador (nullable), es_invitado (boolean), posición (1ro, 2do...), puntos (calculados automáticamente). Si es_invitado es verdadero, id_jugador es nulo. Si es_invitado es falso, id_jugador apunta al jugador inscrito. Los puntos se calculan según el modo de puntaje de la temporada: fijo_15 → 15 - (posición - 1); por_asistentes → total de participantes de la reunión - (posición - 1).
+Representa el resultado de un participante en una reunión específica. Atributos: id, id_reunión, id_jugador (nullable), es_invitado (boolean), posición (1ro, 2do...), puntos (calculados automáticamente). Si es_invitado es verdadero, id_jugador es nulo. Si es_invitado es falso, id_jugador apunta al jugador inscrito. Los puntos se calculan según el modo de puntaje de la temporada: fijo_15 → 15 - (posición - 1); por_asistentes → posición más alta registrada en la reunión (invitados incluidos) - (posición - 1); con la reunión completa equivale a la cantidad de participantes, y un guardado parcial nunca produce puntos negativos.
 
 ## Relaciones
 

@@ -35,6 +35,12 @@ participants in that meeting (6 players -> 6, 5, 4, 3, 2, 1).
 - [x] T2 Frontend: mode selector in create-season form + tests (route: delegated writer — 2+ non-trivial files)
 - [x] T3 Docs: update CLAUDE.md business rule + docs/casos-de-uso.md (CU-01/CU-02) (route: inline, mechanical)
 
+- [x] T4 Fix partial-save bug in `por_asistentes` (route: delegated writer — backend service + frontend copy + docs)
+  Reason (user-confirmed 2026-10-05): the admin UI sends only filled slots with their slot index; saving the last
+  place alone in slot 6 gives total=len=1 → -4 points. Fix: total = max(posicion) instead of len(posiciones).
+  Also fix stale "15 al primero" copy in `GestionReunion.jsx:112` to reflect the season mode.
+  Reopens review finding R3-por-asistentes-gap-positions (previously dismissed incorrectly).
+
 ## Acceptance criteria
 - New season created with `por_asistentes`: meeting with 6 positions stores 6,5,4,3,2,1.
 - Season created without mode: behaves exactly as today (15,14,...).
@@ -62,6 +68,13 @@ participants in that meeting (6 players -> 6, 5, 4, 3, 2, 1).
   - R3-por-asistentes-gap-positions (WARNING): positions are not validated as contiguous 1..N; an API call with gaps (e.g. 1,2,5) in `por_asistentes` would yield 0/negative points. The admin UI always sends 1..N. Pre-existing for `fijo_15` too (position > 15).
   - R3-migration-backfill-unproved (WARNING): no test applies migration 0006 against Postgres; verify on deploy.
   - R3-close-champion-response-untested (SUGGESTION): `modo_puntaje` in close-season/champion responses not covered by tests.
+
+- T4 done — `_guardar_posiciones` now uses `max(posicion)` (default 0) as the `por_asistentes` total; `calcular_puntos` stays pure.
+  `GestionReunion.jsx` create-mode hint depends on `temporada.modo_puntaje` (falls back to fijo_15 copy). Docs: CLAUDE.md, CU-02, modelo-de-datos.
+  RED observed: backend `assert [-4] == [1]` (slot 6 only) and `assert [-2, -3] == [2, 1]` (slots 5,6); frontend por_asistentes hint not found.
+  Slot-1-only (→1) and edit-completing-meeting (→6..1) tests added as guards (already green with len since len==max there).
+  GREEN: `pytest` 372 passed; `npm run test:run` 104 passed (11 files); `npm run build` OK.
+  Resolves R3-por-asistentes-gap-positions for the UI flow: gaps now never yield negative points (missing upper slots are provisional).
 
 ## Next step
 Push + PR is the user's decision. Optional follow-up: validate contiguous positions in meeting input.

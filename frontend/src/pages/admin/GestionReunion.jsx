@@ -11,6 +11,12 @@ import PosicionadorReunion from '../../components/PosicionadorReunion'
 import PageHeader from '../../components/PageHeader'
 import { parseLocalDate, formatDayMonth } from '../../lib/dates'
 
+const HINT_PUNTOS = {
+  fijo_15: 'Los puntos se calculan según el puesto: 15 al primero, 14 al segundo, así hacia abajo.',
+  por_asistentes:
+    'Los puntos se calculan según el puesto: el último registrado recibe 1 punto y cada puesto hacia arriba suma uno (con 6 jugadores, el 1° recibe 6).',
+}
+
 function hoy() {
   return new Date().toISOString().slice(0, 10)
 }
@@ -109,7 +115,7 @@ export default function GestionReunion({ modo }) {
         description={
           isEdit
             ? 'Reordená posiciones, cambiá fecha o sumá invitados. Los puntos se recalculan automáticamente al guardar.'
-            : 'Asigná posiciones arrastrando jugadores. Los puntos se calculan según el puesto: 15 al primero, 14 al segundo, así hacia abajo.'
+            : `Asigná posiciones arrastrando jugadores. ${HINT_PUNTOS[temporada.modo_puntaje] ?? HINT_PUNTOS.fijo_15}`
         }
       />
 

@@ -77,7 +77,11 @@ def _guardar_posiciones(
     modo: ModoPuntaje,
 ) -> None:
     # Guests occupy positions, so they count towards the participant total.
-    total_participantes = len(posiciones_input)
+    # The admin UI may save a partial meeting (only some slots filled, keeping
+    # their slot index), so the total is the highest registered position, not
+    # the number of rows: bottom positions get their final points and nobody
+    # goes negative. Once the meeting is complete both values match.
+    total_participantes = max((p.posicion for p in posiciones_input), default=0)
     for p in posiciones_input:
         db.add(Posicion(
             id_reunion=reunion_id,

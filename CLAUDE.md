@@ -16,7 +16,7 @@ Plataforma web para gestionar una liga de Dudo (juego de dados). Un administrado
 
 - El puntaje depende del modo de la temporada (`modo_puntaje`, elegido al crearla e inmutable):
   - `fijo_15` (default, temporadas históricas): posición 1 = 15 puntos, posición N = 15 - (N-1)
-  - `por_asistentes`: posición 1 = total de participantes de la reunión (invitados incluidos), posición N = total - (N-1)
+  - `por_asistentes`: total = posición más alta registrada en la reunión (invitados incluidos), posición N = total - (N-1). Con la reunión completa, total = cantidad de participantes; en un guardado parcial las posiciones inferiores ya reciben sus puntos finales y nunca hay puntos negativos
 - Los invitados ocupan posiciones y consumen puntos, pero NUNCA aparecen en la tabla de posiciones
 - Los jugadores ausentes reciben 0 puntos
 - Los jugadores inscritos con 0 asistencias y 0 puntos NO se muestran en la tabla — aparecen al registrar su primera asistencia

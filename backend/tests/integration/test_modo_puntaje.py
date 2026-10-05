@@ -2,7 +2,8 @@
 
 - fijo_15 (default): position N = 15 - (N-1).
 - por_asistentes: position 1 = total participants in the meeting (guests included),
-  i.e. puntos = total - posicion + 1.
+  i.e. puntos = total - posicion + 1, where total = highest registered position
+  (partial saves give final points to the bottom positions).
 """
 from datetime import date
 
@@ -116,3 +117,55 @@ def test_por_asistentes_registrar_y_editar_recalcula_con_total(client, auth_head
     )
     assert editada.status_code == 200
     assert _puntos_por_posicion(db, reunion_id) == [4, 3, 2, 1]
+
+
+def _registrar(client, headers, temporada_id, posiciones):
+    r = client.post(
+        f"/temporadas/{temporada_id}/reuniones",
+        json={"fecha": str(date.today()), "posiciones": posiciones},
+        headers=headers,
+    )
+    assert r.status_code == 201
+    return r.json()["id"]
+
+
+def test_por_asistentes_guardado_parcial_solo_ultimo_puesto_recibe_1(client, auth_headers, jugadores, db):
+    # Admin UI sends only filled slots with their slot index: last place alone in slot 6.
+    temporada = _crear_temporada(client, auth_headers, jugadores, modo_puntaje="por_asistentes").json()
+    reunion_id = _registrar(client, auth_headers, temporada["id"], [
+        {"id_jugador": jugadores[4].id, "es_invitado": False, "posicion": 6},
+    ])
+    assert _puntos_por_posicion(db, reunion_id) == [1]
+
+
+def test_por_asistentes_guardado_parcial_dos_ultimos_puestos(client, auth_headers, jugadores, db):
+    temporada = _crear_temporada(client, auth_headers, jugadores, modo_puntaje="por_asistentes").json()
+    reunion_id = _registrar(client, auth_headers, temporada["id"], [
+        {"id_jugador": jugadores[3].id, "es_invitado": False, "posicion": 5},
+        {"id_jugador": jugadores[4].id, "es_invitado": False, "posicion": 6},
+    ])
+    assert _puntos_por_posicion(db, reunion_id) == [2, 1]
+
+
+def test_por_asistentes_guardado_parcial_solo_primer_puesto_no_es_negativo(client, auth_headers, jugadores, db):
+    temporada = _crear_temporada(client, auth_headers, jugadores, modo_puntaje="por_asistentes").json()
+    reunion_id = _registrar(client, auth_headers, temporada["id"], [
+        {"id_jugador": jugadores[0].id, "es_invitado": False, "posicion": 1},
+    ])
+    assert _puntos_por_posicion(db, reunion_id) == [1]
+
+
+def test_por_asistentes_editar_completando_reunion_recalcula(client, auth_headers, jugadores, db):
+    temporada = _crear_temporada(client, auth_headers, jugadores, modo_puntaje="por_asistentes").json()
+    reunion_id = _registrar(client, auth_headers, temporada["id"], [
+        {"id_jugador": jugadores[3].id, "es_invitado": False, "posicion": 5},
+        {"id_jugador": jugadores[4].id, "es_invitado": False, "posicion": 6},
+    ])
+
+    editada = client.put(
+        f"/reuniones/{reunion_id}",
+        json={"fecha": str(date.today()), "posiciones": _posiciones_seis_con_invitado(jugadores)},
+        headers=auth_headers,
+    )
+    assert editada.status_code == 200
+    assert _puntos_por_posicion(db, reunion_id) == [6, 5, 4, 3, 2, 1]

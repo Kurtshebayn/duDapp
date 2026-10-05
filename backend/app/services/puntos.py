@@ -10,7 +10,8 @@ def calcular_puntos(
 
     - fijo_15: position 1 = 15 points, position N = 15 - (N-1).
     - por_asistentes: position 1 = total participants in the meeting (guests
-      included), position N = total - (N-1).
+      included), position N = total - (N-1). Callers pass the highest
+      registered position as the total.
     """
     if modo == ModoPuntaje.por_asistentes:
         if total_participantes is None:
