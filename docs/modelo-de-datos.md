@@ -10,7 +10,7 @@ Representa a una persona que participa en ligas. Existe independientemente de la
 
 ## Entidad: Temporada
 
-Representa un ciclo de la liga (~3 meses). Atributos: id, nombre, fecha de inicio (automática), estado (activa/cerrada). Solo puede haber una temporada activa a la vez. Pertenece a un usuario (admin). Al cerrarse, no se puede modificar.
+Representa un ciclo de la liga (~3 meses). Atributos: id, nombre, fecha de inicio (automática), estado (activa/cerrada), modo de puntaje (fijo_15/por_asistentes, elegido al crearla e inmutable). Solo puede haber una temporada activa a la vez. Pertenece a un usuario (admin). Al cerrarse, no se puede modificar.
 
 ## Entidad: Inscripción (Temporada ↔ Jugador)
 
@@ -22,7 +22,7 @@ Representa una sesión de juego semanal dentro de una temporada. Atributos: id, 
 
 ## Entidad: Posición
 
-Representa el resultado de un participante en una reunión específica. Atributos: id, id_reunión, id_jugador (nullable), es_invitado (boolean), posición (1ro, 2do...), puntos (calculados automáticamente). Si es_invitado es verdadero, id_jugador es nulo. Si es_invitado es falso, id_jugador apunta al jugador inscrito. Los puntos se calculan como: 15 - (posición - 1).
+Representa el resultado de un participante en una reunión específica. Atributos: id, id_reunión, id_jugador (nullable), es_invitado (boolean), posición (1ro, 2do...), puntos (calculados automáticamente). Si es_invitado es verdadero, id_jugador es nulo. Si es_invitado es falso, id_jugador apunta al jugador inscrito. Los puntos se calculan según el modo de puntaje de la temporada: fijo_15 → 15 - (posición - 1); por_asistentes → total de participantes de la reunión - (posición - 1).
 
 ## Relaciones
 

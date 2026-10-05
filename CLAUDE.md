@@ -14,7 +14,9 @@ Plataforma web para gestionar una liga de Dudo (juego de dados). Un administrado
 
 ## Reglas de negocio críticas (no violar nunca)
 
-- El primer lugar siempre recibe 15 puntos, el segundo 14, posición N = 15 - (N-1)
+- El puntaje depende del modo de la temporada (`modo_puntaje`, elegido al crearla e inmutable):
+  - `fijo_15` (default, temporadas históricas): posición 1 = 15 puntos, posición N = 15 - (N-1)
+  - `por_asistentes`: posición 1 = total de participantes de la reunión (invitados incluidos), posición N = total - (N-1)
 - Los invitados ocupan posiciones y consumen puntos, pero NUNCA aparecen en la tabla de posiciones
 - Los jugadores ausentes reciben 0 puntos
 - Los jugadores inscritos con 0 asistencias y 0 puntos NO se muestran en la tabla — aparecen al registrar su primera asistencia
@@ -27,7 +29,7 @@ Plataforma web para gestionar una liga de Dudo (juego de dados). Un administrado
 
 - **Usuario:** id, email, contraseña (hasheada), nombre
 - **Jugador:** id, nombre (reutilizable entre temporadas)
-- **Temporada:** id, nombre, fecha_inicio, estado (activa/cerrada), id_usuario
+- **Temporada:** id, nombre, fecha_inicio, estado (activa/cerrada), modo_puntaje (fijo_15/por_asistentes), id_usuario
 - **Inscripción:** id, id_temporada, id_jugador
 - **Reunión:** id, id_temporada, numero_jornada, fecha
 - **Posición:** id, id_reunión, id_jugador (nullable), es_invitado (boolean), posición, puntos
