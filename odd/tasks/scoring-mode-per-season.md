@@ -57,5 +57,11 @@ participants in that meeting (6 players -> 6, 5, 4, 3, 2, 1).
   RDD assess after T2: medium, review_due=true, `slice_budget_reached` (491 lines). Preflight STATUS asked for intended-untracked selection (this doc); submissions rejected as invalid JSON → doc committed with T3 so the candidate has no untracked files, then preflight re-run.
 - T3 done — CLAUDE.md business rule + data model, `docs/casos-de-uso.md` (CU-01, CU-02), `docs/modelo-de-datos.md`. Not updated on purpose: `docs/csv-import-format.md` (import still 15-scale), `docs/estrategia-de-testing.md`, `docs/vision.md`.
 
+- Native review (user granted): lineage `review-7a03c69889d12a3a`, 1 lens (reliability), **approved**, acknowledged, authority burned. Reviewed range main..2393dca.
+  Non-blocking follow-ups:
+  - R3-por-asistentes-gap-positions (WARNING): positions are not validated as contiguous 1..N; an API call with gaps (e.g. 1,2,5) in `por_asistentes` would yield 0/negative points. The admin UI always sends 1..N. Pre-existing for `fijo_15` too (position > 15).
+  - R3-migration-backfill-unproved (WARNING): no test applies migration 0006 against Postgres; verify on deploy.
+  - R3-close-champion-response-untested (SUGGESTION): `modo_puntaje` in close-season/champion responses not covered by tests.
+
 ## Next step
-Native review of the slice (main..HEAD), then push/PR is the user's decision.
+Push + PR is the user's decision. Optional follow-up: validate contiguous positions in meeting input.
