@@ -206,8 +206,8 @@ export default function Dashboard() {
         title={<>Tu <span className="ital">mesa.</span></>}
         description={
           temporada
-            ? `${temporada.nombre} en curso. Registrá reuniones, gestioná jugadores, cerrá la temporada cuando llegue el momento.`
-            : 'Sin temporada activa. Empezá una nueva para comenzar a registrar jornadas.'
+            ? `${temporada.nombre} en curso. Registra reuniones, gestiona jugadores, cierra la temporada cuando llegue el momento.`
+            : 'Sin temporada activa. Empieza una nueva para comenzar a registrar jornadas.'
         }
       />
 
@@ -226,7 +226,7 @@ export default function Dashboard() {
         <div className="empty-state">
           <div className="empty-state-title">No hay temporada activa</div>
           <div className="empty-state-sub">
-            Creá una nueva temporada para empezar a registrar reuniones.
+            Crea una nueva temporada para empezar a registrar reuniones.
           </div>
           <Link to="/admin/temporada/nueva" className="btn btn-primary">
             + Nueva temporada
@@ -240,7 +240,8 @@ export default function Dashboard() {
                 <div className="season-name">{temporada.nombre}</div>
                 <div className="season-meta">
                   {temporada.total_reuniones} reunión{temporada.total_reuniones !== 1 ? 'es' : ''} ·{' '}
-                  {temporada.jugadores.length} jugadores
+                  {temporada.jugadores.length} jugadores ·{' '}
+                  {temporada.modo_puntaje === 'por_asistentes' ? 'Puntaje según asistentes' : 'Puntaje fijo (15)'}
                 </div>
               </div>
               <div className="season-actions">

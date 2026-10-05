@@ -15,7 +15,7 @@ como separador alternativo.
 No se aceptan otros separadores (tabulador, pipe, etc.).
 
 > **Consejo**: Google Sheets exporta con coma por defecto en configuraciones en inglés y con
-> punto y coma en configuraciones en español. Verificá el separador antes de subir.
+> punto y coma en configuraciones en español. Verifica el separador antes de subir.
 
 ---
 
@@ -45,7 +45,7 @@ Jugador1;Jugador2;Jugador3
   sin distinguir mayúsculas, con espacios recortados).
 - Si un nombre no existe en el catálogo, la importación se rechaza con
   `jugadores_no_resueltos` listando *todos* los nombres no encontrados.
-- No se crean jugadores nuevos automáticamente — creálos primero desde el dashboard.
+- No se crean jugadores nuevos automáticamente — créalos primero desde el dashboard.
 - No puede haber dos columnas con el mismo nombre (insensible a mayúsculas) en la
   misma cabecera.
 
@@ -122,13 +122,13 @@ Ana;Beto;Carla
 
 ## Exportar desde Google Sheets
 
-1. Abrí la planilla en Google Sheets.
-2. Asegurate de que la primera fila tenga los nombres de los jugadores y las filas
+1. Abre la planilla en Google Sheets.
+2. Asegúrate de que la primera fila tenga los nombres de los jugadores y las filas
    siguientes los puntajes de cada reunión.
 3. Menú: **Archivo → Descargar → Valores separados por comas (.csv)**.
 4. El archivo descargado usa coma (`,`) como separador en configuraciones en inglés o
    punto y coma (`;`) en español. Ambos son aceptados por el importador.
-5. Si tu sistema está en inglés y quieres el separador `;`, podés cambiar la configuración
+5. Si tu sistema está en inglés y quieres el separador `;`, puedes cambiar la configuración
    regional de la hoja: **Archivo → Configuración de la hoja de cálculo → Configuración
    regional → seleccionar un país de habla hispana**.
 
@@ -138,12 +138,12 @@ Ana;Beto;Carla
 
 | Código de error | Causa | Solución |
 |----------------|-------|----------|
-| `csv_encoding_invalid` | El archivo no está en UTF-8 | Guardá como UTF-8 desde Excel o Google Sheets |
-| `csv_invalido` | No hay estructura CSV reconocible | Verificá que el archivo tenga encabezado y filas de datos |
-| `csv_sin_reuniones` | Hay encabezado pero ninguna fila de datos | Agregá las filas de puntajes |
-| `jugadores_no_resueltos` | Un nombre del encabezado no existe en el catálogo | Creá el jugador desde el dashboard antes de importar |
-| `puntaje_invalido` | Una celda tiene un valor fuera del rango `[0, 15]` | Corregí las celdas indicadas en el error |
-| `puntajes_duplicados` | Dos jugadores tienen el mismo puntaje en la misma reunión | En Dudo cada posición es única; revisá la fila indicada |
-| `reunion_todos_ausentes` | Una fila entera tiene solo ceros | Eliminá la fila o corregí los puntajes |
-| `temporada_duplicada` | Ya existe una temporada con ese nombre | Usá un nombre diferente o eliminá la existente antes de reimportar |
-| `campeon_no_inscripto` | El nombre del campeón no coincide con ningún encabezado del CSV | Verificá la ortografía (la búsqueda es insensible a mayúsculas) |
+| `csv_encoding_invalid` | El archivo no está en UTF-8 | Guarda como UTF-8 desde Excel o Google Sheets |
+| `csv_invalido` | No hay estructura CSV reconocible | Verifica que el archivo tenga encabezado y filas de datos |
+| `csv_sin_reuniones` | Hay encabezado pero ninguna fila de datos | Agrega las filas de puntajes |
+| `jugadores_no_resueltos` | Un nombre del encabezado no existe en el catálogo | Crea el jugador desde el dashboard antes de importar |
+| `puntaje_invalido` | Una celda tiene un valor fuera del rango `[0, 15]` | Corrige las celdas indicadas en el error |
+| `puntajes_duplicados` | Dos jugadores tienen el mismo puntaje en la misma reunión | En Dudo cada posición es única; revisa la fila indicada |
+| `reunion_todos_ausentes` | Una fila entera tiene solo ceros | Elimina la fila o corrige los puntajes |
+| `temporada_duplicada` | Ya existe una temporada con ese nombre | Usa un nombre diferente o elimina la existente antes de reimportar |
+| `campeon_no_inscripto` | El nombre del campeón no coincide con ningún encabezado del CSV | Verifica la ortografía (la búsqueda es insensible a mayúsculas) |

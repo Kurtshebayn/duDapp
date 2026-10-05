@@ -72,6 +72,26 @@ async function renderDashboard() {
   })
 }
 
+describe('Dashboard — scoring mode label', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.resetModules()
+  })
+
+  it('shows "según asistentes" when the active season uses por_asistentes', async () => {
+    const api = await import('../../../services/api')
+    vi.mocked(api.getTemporadaActiva).mockResolvedValue({ ...temporadaActiva, modo_puntaje: 'por_asistentes' })
+    vi.mocked(api.getReuniones).mockResolvedValue([])
+    vi.mocked(api.getJugadores).mockResolvedValue([])
+
+    const Dashboard = (await import('../Dashboard')).default
+    render(<MemoryRouter><Dashboard /></MemoryRouter>)
+    await waitFor(() => expect(screen.queryByText(/Cargando/)).not.toBeInTheDocument())
+
+    expect(screen.getByText(/Puntaje según asistentes/)).toBeInTheDocument()
+  })
+})
+
 describe('Dashboard — handleCerrar tie-detection branching', () => {
   beforeEach(async () => {
     vi.clearAllMocks()

@@ -55,6 +55,7 @@ def get_temporada_activa_detalle(db: Session) -> dict:
         "nombre": temporada.nombre,
         "estado": temporada.estado,
         "fecha_inicio": temporada.fecha_inicio,
+        "modo_puntaje": temporada.modo_puntaje,
         "jugadores": jugadores,
         "total_reuniones": total_reuniones,
     }

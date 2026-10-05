@@ -12,6 +12,19 @@ const CAMERA_ICON = (
   </svg>
 )
 
+const MODOS_PUNTAJE = [
+  {
+    value: 'fijo_15',
+    label: 'Fijo (15 puntos)',
+    description: 'El 1° lugar siempre recibe 15 puntos, el 2° 14, y así.',
+  },
+  {
+    value: 'por_asistentes',
+    label: 'Según asistentes',
+    description: 'El 1° lugar recibe tantos puntos como jugadores en la reunión (6 jugadores → 6, 5, 4…).',
+  },
+]
+
 export default function CrearTemporada() {
   const { token } = useAuth()
   const navigate = useNavigate()
@@ -19,6 +32,7 @@ export default function CrearTemporada() {
   const [uploadingId, setUploadingId] = useState(null)
   const [nombre, setNombre] = useState('')
   const [fechaInicio, setFechaInicio] = useState(() => new Date().toISOString().slice(0, 10))
+  const [modoPuntaje, setModoPuntaje] = useState('fijo_15')
   const [jugadoresExistentes, setJugadoresExistentes] = useState([])
   const [seleccionados, setSeleccionados] = useState(new Set())
   const [nuevosNombres, setNuevosNombres] = useState([])
@@ -75,7 +89,7 @@ export default function CrearTemporada() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (seleccionados.size + nuevosNombres.length === 0) {
-      setError('Agregá al menos un jugador.')
+      setError('Agrega al menos un jugador.')
       return
     }
     setError(null)
@@ -85,7 +99,7 @@ export default function CrearTemporada() {
         ...[...seleccionados].map((id) => ({ id })),
         ...nuevosNombres.map((n) => ({ nombre: n })),
       ]
-      await crearTemporada(token, nombre, fechaInicio, jugadores)
+      await crearTemporada(token, nombre, fechaInicio, jugadores, modoPuntaje)
       navigate('/admin')
     } catch (err) {
       setError(err.message)
@@ -107,8 +121,8 @@ export default function CrearTemporada() {
 
       <PageHeader
         eyebrow="Panel admin · Nueva temporada"
-        title={<>Empezá una<br /><span className="ital">temporada.</span></>}
-        description="Definí el nombre, la fecha de inicio y la lista de jugadores que van a competir. Podés sumar jugadores nuevos o reusar los del catálogo."
+        title={<>Empieza una<br /><span className="ital">temporada.</span></>}
+        description="Define el nombre, la fecha de inicio y la lista de jugadores que van a competir. Puedes sumar jugadores nuevos o reusar los del catálogo."
       />
 
       <div className="stitch" />
@@ -148,6 +162,33 @@ export default function CrearTemporada() {
             required
           />
         </div>
+
+        <fieldset className="form-group scoring-mode">
+          <legend className="form-label">Sistema de puntaje</legend>
+          <div className="scoring-mode-options">
+            {MODOS_PUNTAJE.map((modo) => (
+              <label
+                key={modo.value}
+                className={`scoring-mode-option${modoPuntaje === modo.value ? ' selected' : ''}`}
+              >
+                <input
+                  type="radio"
+                  name="modo_puntaje"
+                  value={modo.value}
+                  checked={modoPuntaje === modo.value}
+                  onChange={() => setModoPuntaje(modo.value)}
+                  aria-label={modo.label}
+                  aria-describedby={`ct-modo-${modo.value}-desc`}
+                />
+                <span className="scoring-mode-label">{modo.label}</span>
+                <span className="scoring-mode-desc" id={`ct-modo-${modo.value}-desc`}>
+                  {modo.description}
+                </span>
+              </label>
+            ))}
+          </div>
+          <small className="form-help">No se puede cambiar una vez creada la temporada.</small>
+        </fieldset>
 
         {jugadoresExistentes.length > 0 && (
           <div className="form-group">

@@ -100,7 +100,7 @@ El proyecto creció en fases deliberadas — cada una un cimiento, no una carrer
 Operar en producción enseña cosas que localhost nunca enseñará. Dos que quedaron grabadas:
 
 - **🔐 Los JWT se estaban firmando con un secret de fallback público en producción.** `JWT_SECRET` nunca se había seteado en Render, así que la app caía silenciosamente a un default. Detectado durante una auditoría OWASP Top 10 → se rotó el secret y se agregó un chequeo **fail-fast** para que la app se niegue a arrancar sin un secret real. (Shipeado como parte de la fase de hardening, junto a rate-limiting en login, validación de uploads y apagar `/docs` en prod.)
-- **🚀 Render no corre las migraciones por vos.** Los deploys shipeaban código adelantado al schema hasta que el start command se actualizó para correr `alembic upgrade head` en cada deploy.
+- **🚀 Render no corre las migraciones por ti.** Los deploys shipeaban código adelantado al schema hasta que el start command se actualizó para correr `alembic upgrade head` en cada deploy.
 
 No son notas al pie — son la diferencia entre "funciona en mi máquina" y "corre en producción".
 
@@ -136,7 +136,7 @@ npm install
 npm run dev
 ```
 
-**Variables de entorno requeridas** (nunca commiteadas — usá un `.env` local):
+**Variables de entorno requeridas** (nunca commiteadas — usa un `.env` local):
 
 | Variable | Para qué |
 |----------|----------|
@@ -144,7 +144,7 @@ npm run dev
 | `JWT_SECRET` | Secret para firmar tokens (la app **no arranca** sin él) |
 | `CORS_ORIGINS` | Orígenes permitidos del frontend |
 
-Corré las suites de tests con:
+Corre las suites de tests con:
 
 ```bash
 cd backend && pytest          # backend

@@ -47,6 +47,39 @@ describe('api — designarCampeon', () => {
   })
 })
 
+describe('api — crearTemporada', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn(() =>
+      Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ id: 1 }) })
+    ))
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.resetModules()
+  })
+
+  it('sends modo_puntaje in the POST /temporadas body', async () => {
+    const { crearTemporada } = await import('../api.js')
+    await crearTemporada('tok', 'Liga 2027', '2027-01-01', [{ nombre: 'Ana' }], 'por_asistentes')
+    const [url, opts] = vi.mocked(fetch).mock.calls[0]
+    expect(url).toMatch(/\/temporadas$/)
+    expect(JSON.parse(opts.body)).toEqual({
+      nombre: 'Liga 2027',
+      fecha_inicio: '2027-01-01',
+      jugadores: [{ nombre: 'Ana' }],
+      modo_puntaje: 'por_asistentes',
+    })
+  })
+
+  it('defaults modo_puntaje to fijo_15 when omitted', async () => {
+    const { crearTemporada } = await import('../api.js')
+    await crearTemporada('tok', 'Liga 2027', '2027-01-01', [])
+    const [, opts] = vi.mocked(fetch).mock.calls[0]
+    expect(JSON.parse(opts.body).modo_puntaje).toBe('fijo_15')
+  })
+})
+
 describe('api — getRankingNarrativo', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn(() =>

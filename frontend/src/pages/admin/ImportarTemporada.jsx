@@ -34,7 +34,7 @@ function ErrorPanel({ error }) {
     case 'jugadores_no_resueltos':
       return (
         <div className="alert alert-error">
-          <p>Estos jugadores del CSV no existen en el catálogo. Creálos primero desde el dashboard:</p>
+          <p>Estos jugadores del CSV no existen en el catálogo. Créalos primero desde el dashboard:</p>
           <ul>
             {(error.nombres ?? []).map((n) => <li key={n}>{n}</li>)}
           </ul>
@@ -71,7 +71,7 @@ function ErrorPanel({ error }) {
     case 'puntajes_duplicados':
       return (
         <div className="alert alert-error">
-          Fila {error.fila}: dos jugadores tienen el mismo puntaje ({error.valor}). Revisá la planilla — en Dudo cada posición tiene un puntaje único.
+          Fila {error.fila}: dos jugadores tienen el mismo puntaje ({error.valor}). Revisa la planilla — en Dudo cada posición tiene un puntaje único.
         </div>
       )
 
@@ -95,21 +95,21 @@ function ErrorPanel({ error }) {
     case 'csv_encoding_invalid':
       return (
         <div className="alert alert-error">
-          El archivo no pudo leerse como UTF-8. Guardá el CSV con codificación UTF-8 desde tu editor o Google Sheets.
+          El archivo no pudo leerse como UTF-8. Guarda el CSV con codificación UTF-8 desde tu editor o Google Sheets.
         </div>
       )
 
     case 'csv_invalido':
       return (
         <div className="alert alert-error">
-          El archivo no tiene una estructura CSV válida. Verificá que sea un archivo de texto con encabezados y filas de datos.
+          El archivo no tiene una estructura CSV válida. Verifica que sea un archivo de texto con encabezados y filas de datos.
         </div>
       )
 
     case 'csv_sin_reuniones':
       return (
         <div className="alert alert-error">
-          El CSV tiene encabezados pero ninguna fila de datos. Agregá al menos una reunión.
+          El CSV tiene encabezados pero ninguna fila de datos. Agrega al menos una reunión.
         </div>
       )
 
@@ -119,7 +119,7 @@ function ErrorPanel({ error }) {
     default:
       return (
         <div className="alert alert-error">
-          {error.message ?? 'Ocurrió un error inesperado. Revisá los datos e intentá de nuevo.'}
+          {error.message ?? 'Ocurrió un error inesperado. Revisa los datos e intenta de nuevo.'}
         </div>
       )
   }
@@ -140,7 +140,7 @@ export default function ImportarTemporada() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (!archivo) {
-      setError({ code: 'frontend', message: 'Seleccioná un archivo CSV antes de importar.' })
+      setError({ code: 'frontend', message: 'Selecciona un archivo CSV antes de importar.' })
       return
     }
     setSubmitting(true)
@@ -219,7 +219,7 @@ export default function ImportarTemporada() {
       <PageHeader
         eyebrow="Panel admin · Importar"
         title={<>Importar<br /><span className="ital">temporada histórica.</span></>}
-        description="Subí un CSV exportado de Google Sheets para incorporar una temporada cerrada al histórico de la liga. No afecta a la temporada activa."
+        description="Sube un CSV exportado de Google Sheets para incorporar una temporada cerrada al histórico de la liga. No afecta a la temporada activa."
       />
 
       <div className="stitch" />
@@ -283,7 +283,7 @@ export default function ImportarTemporada() {
             required
           />
           <span className="form-help">
-            Exportá desde Google Sheets: Archivo → Descargar → Valores separados por comas (.csv).
+            Exporta desde Google Sheets: Archivo → Descargar → Valores separados por comas (.csv).
             Separador <code>;</code> preferido, <code>,</code> también aceptado.
           </span>
         </div>

@@ -93,7 +93,7 @@ def _parsear_csv(archivo_bytes: bytes) -> ParsedCsv:
             status_code=422,
             detail={
                 "code": "csv_encoding_invalid",
-                "message": "El archivo no es UTF-8 válido. Exportá el CSV con codificación UTF-8.",
+                "message": "El archivo no es UTF-8 válido. Exporta el CSV con codificación UTF-8.",
             },
         )
 

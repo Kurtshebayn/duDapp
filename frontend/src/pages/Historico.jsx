@@ -175,7 +175,7 @@ function H2HSection({ resumen, h2hCache, loadingH2h, errorH2h, selectedJugadorId
 
       {selectedJugadorId == null && (
         <p className="status historico-empty">
-          Seleccioná un jugador para ver sus enfrentamientos.
+          Selecciona un jugador para ver sus enfrentamientos.
         </p>
       )}
 

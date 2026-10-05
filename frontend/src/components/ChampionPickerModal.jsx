@@ -32,9 +32,9 @@ export default function ChampionPickerModal({ open, tiedPlayers, onPick, onCance
   return (
     <div className="modal-backdrop" onClick={handleCancel}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-        <h3 className="modal-title">Empate al cierre — seleccioná el campeón</h3>
+        <h3 className="modal-title">Empate al cierre — selecciona el campeón</h3>
         <p style={{ marginBottom: '16px', color: 'var(--muted)' }}>
-          Hay {tiedPlayers.length} jugadores empatados en 1° puesto. Elegí el campeón según el enfrentamiento directo.
+          Hay {tiedPlayers.length} jugadores empatados en 1° puesto. Elige el campeón según el enfrentamiento directo.
         </p>
 
         <div style={{ marginBottom: '16px' }}>
