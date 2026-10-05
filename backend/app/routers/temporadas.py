@@ -44,7 +44,9 @@ def crear_temporada(
     db: Session = Depends(get_db),
     user: Usuario = Depends(get_current_user),
 ):
-    return temporada_service.crear_temporada(db, body.nombre, body.fecha_inicio, body.jugadores, user.id)
+    return temporada_service.crear_temporada(
+        db, body.nombre, body.fecha_inicio, body.jugadores, user.id, body.modo_puntaje
+    )
 
 
 @router.post("/{temporada_id}/cerrar", response_model=TemporadaResponse)
@@ -65,6 +67,7 @@ def cerrar_temporada(
         "nombre": temporada.nombre,
         "fecha_inicio": temporada.fecha_inicio.isoformat() if isinstance(temporada.fecha_inicio, date_type) else temporada.fecha_inicio,
         "estado": temporada.estado.value if hasattr(temporada.estado, "value") else temporada.estado,
+        "modo_puntaje": temporada.modo_puntaje.value,
         "campeon_id": temporada.campeon_id,
         "tie_detected": tie_detected,
     }
@@ -86,6 +89,7 @@ def designar_campeon(
         "nombre": temporada.nombre,
         "fecha_inicio": temporada.fecha_inicio,
         "estado": temporada.estado,
+        "modo_puntaje": temporada.modo_puntaje,
         "campeon_id": temporada.campeon_id,
         "tie_detected": False,   # endpoint doesn't carry tie semantics
     }

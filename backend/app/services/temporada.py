@@ -6,10 +6,17 @@ from sqlalchemy.orm import Session
 
 from app.models.inscripcion import Inscripcion
 from app.models.jugador import Jugador
-from app.models.temporada import EstadoTemporada, Temporada
+from app.models.temporada import EstadoTemporada, ModoPuntaje, Temporada
 
 
-def crear_temporada(db: Session, nombre: str, fecha_inicio: date, jugadores_input: list, usuario_id: int) -> Temporada:
+def crear_temporada(
+    db: Session,
+    nombre: str,
+    fecha_inicio: date,
+    jugadores_input: list,
+    usuario_id: int,
+    modo_puntaje: ModoPuntaje = ModoPuntaje.fijo_15,
+) -> Temporada:
     if db.query(Temporada).filter(Temporada.estado == EstadoTemporada.activa).first():
         raise HTTPException(status_code=400, detail="Ya existe una temporada activa")
 
@@ -18,6 +25,7 @@ def crear_temporada(db: Session, nombre: str, fecha_inicio: date, jugadores_inpu
         fecha_inicio=fecha_inicio,
         estado=EstadoTemporada.activa,
         id_usuario=usuario_id,
+        modo_puntaje=modo_puntaje,
     )
     db.add(temporada)
     db.flush()

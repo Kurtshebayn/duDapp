@@ -10,6 +10,7 @@ class TemporadaActivaDetalleResponse(BaseModel):
     nombre: str
     estado: str
     fecha_inicio: date
+    modo_puntaje: str
     jugadores: list[JugadorResponse]
     total_reuniones: int
 

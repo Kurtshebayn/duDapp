@@ -2,6 +2,7 @@ from datetime import date
 
 from pydantic import BaseModel, model_serializer
 
+from app.models.temporada import ModoPuntaje
 from app.schemas.jugador import JugadorInput
 
 
@@ -9,6 +10,7 @@ class TemporadaCreate(BaseModel):
     nombre: str
     fecha_inicio: date
     jugadores: list[JugadorInput]
+    modo_puntaje: ModoPuntaje = ModoPuntaje.fijo_15
 
 
 class TiedPlayerSchema(BaseModel):
@@ -21,6 +23,7 @@ class TemporadaResponse(BaseModel):
     nombre: str
     fecha_inicio: date
     estado: str
+    modo_puntaje: str = ModoPuntaje.fijo_15.value
     campeon_id: int | None = None
     tie_detected: bool = False
     tied_players: list[TiedPlayerSchema] | None = None

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.posicion import Posicion
 from app.models.reunion import Reunion
-from app.models.temporada import EstadoTemporada, Temporada
+from app.models.temporada import EstadoTemporada, ModoPuntaje, Temporada
 from app.services import snapshots as snapshots_service
 from app.services.puntos import calcular_puntos
 
@@ -27,7 +27,7 @@ def registrar_reunion(
     db.add(reunion)
     db.flush()
 
-    _guardar_posiciones(db, reunion.id, posiciones_input)
+    _guardar_posiciones(db, reunion.id, posiciones_input, temporada.modo_puntaje)
     db.flush()  # ensure Posicion rows are visible before snapshot generation
 
     snapshots_service._generar_snapshots_para_reunion(db, temporada_id, reunion.id)
@@ -47,11 +47,11 @@ def editar_reunion(
     if not reunion:
         raise HTTPException(status_code=404, detail="Reunión no encontrada")
 
-    _get_temporada_activa(db, reunion.id_temporada)
+    temporada = _get_temporada_activa(db, reunion.id_temporada)
 
     db.query(Posicion).filter(Posicion.id_reunion == reunion_id).delete()
     reunion.fecha = fecha
-    _guardar_posiciones(db, reunion_id, posiciones_input)
+    _guardar_posiciones(db, reunion_id, posiciones_input, temporada.modo_puntaje)
     db.flush()  # ensure updated Posicion rows are visible before snapshot replay
 
     snapshots_service._regenerar_snapshots_temporada(db, reunion.id_temporada)
@@ -70,12 +70,19 @@ def _get_temporada_activa(db: Session, temporada_id: int) -> Temporada:
     return temporada
 
 
-def _guardar_posiciones(db: Session, reunion_id: int, posiciones_input: list) -> None:
+def _guardar_posiciones(
+    db: Session,
+    reunion_id: int,
+    posiciones_input: list,
+    modo: ModoPuntaje,
+) -> None:
+    # Guests occupy positions, so they count towards the participant total.
+    total_participantes = len(posiciones_input)
     for p in posiciones_input:
         db.add(Posicion(
             id_reunion=reunion_id,
             id_jugador=p.id_jugador,
             es_invitado=p.es_invitado,
             posicion=p.posicion,
-            puntos=calcular_puntos(p.posicion),
+            puntos=calcular_puntos(p.posicion, modo, total_participantes),
         ))
