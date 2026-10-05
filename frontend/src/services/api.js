@@ -53,11 +53,11 @@ export function login(identificador, password) {
   })
 }
 
-export function crearTemporada(token, nombre, fechaInicio, jugadores) {
+export function crearTemporada(token, nombre, fechaInicio, jugadores, modoPuntaje = 'fijo_15') {
   return apiFetch('/temporadas', {
     method: 'POST',
     headers: authHeaders(token),
-    body: JSON.stringify({ nombre, fecha_inicio: fechaInicio, jugadores }),
+    body: JSON.stringify({ nombre, fecha_inicio: fechaInicio, jugadores, modo_puntaje: modoPuntaje }),
   })
 }
 

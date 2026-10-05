@@ -240,7 +240,8 @@ export default function Dashboard() {
                 <div className="season-name">{temporada.nombre}</div>
                 <div className="season-meta">
                   {temporada.total_reuniones} reunión{temporada.total_reuniones !== 1 ? 'es' : ''} ·{' '}
-                  {temporada.jugadores.length} jugadores
+                  {temporada.jugadores.length} jugadores ·{' '}
+                  {temporada.modo_puntaje === 'por_asistentes' ? 'Puntaje según asistentes' : 'Puntaje fijo (15)'}
                 </div>
               </div>
               <div className="season-actions">

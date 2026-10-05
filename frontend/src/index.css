@@ -1989,6 +1989,55 @@ tbody td {
   max-width: 240px;
 }
 
+/* Selector de sistema de puntaje (CrearTemporada) */
+.scoring-mode {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.scoring-mode-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.6rem;
+}
+.scoring-mode-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.scoring-mode-option:hover { border-color: var(--border-strong); }
+.scoring-mode-option.selected {
+  border-color: var(--leather);
+  background: var(--leather-tint-soft);
+}
+/* Radio visualmente oculto pero accesible por teclado */
+.scoring-mode-option input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+.scoring-mode-option:has(input:focus-visible) {
+  outline: 2px solid var(--leather);
+  outline-offset: 2px;
+}
+.scoring-mode-label {
+  font-weight: 600;
+}
+.scoring-mode-desc {
+  font-size: 12px;
+  color: var(--muted-2);
+  line-height: 1.5;
+}
+
 /* Hint inline al lado de un label */
 .form-label-hint {
   font-family: var(--font-mono);
